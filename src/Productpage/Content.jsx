@@ -1,12 +1,15 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
 import Call from "../assets/calling.svg";
+import FAQ from "../components/FAQ";
+import ItineraryTimeline from "./ItineraryTimeline";
+import PackageShowcase from "./PackageShowcase";
 
 const Content = ({ product, thingsToCarry, howToReach }) => {
-  if (!product) return null;
-
   const MAX_WORDS = 50;
   const [expandedSections, setExpandedSections] = useState({});
+
+  if (!product) return null;
 
   const toggleSection = (key) => {
     setExpandedSections((prev) => ({
@@ -15,27 +18,6 @@ const Content = ({ product, thingsToCarry, howToReach }) => {
     }));
   };
 
-  // Handle FAQ data
-  let faqData = [];
-  let isFaqJson = false;
-
-  if (product.faq && typeof product.faq === "string") {
-    try {
-      if (
-        product.faq.trim().startsWith("[") ||
-        product.faq.trim().startsWith("{")
-      ) {
-        const parsed = JSON.parse(product.faq);
-        if (Array.isArray(parsed)) {
-          faqData = parsed;
-          isFaqJson = true;
-        }
-      }
-    } catch {
-      faqData = null;
-      isFaqJson = false;
-    }
-  }
 
   // Count words
   const countWords = (text) => {
@@ -48,30 +30,33 @@ const Content = ({ product, thingsToCarry, howToReach }) => {
     const wordCount = countWords(htmlContent);
     const isExpanded = expandedSections[key];
     const shouldTruncate = wordCount > MAX_WORDS;
-
+  
     const truncated =
       shouldTruncate && !isExpanded
         ? htmlContent.split(" ").slice(0, MAX_WORDS).join(" ") + "..."
         : htmlContent;
-
+  
     return (
       <div className="w-full mx-auto mb-6">
-        {showTitle && (
-          <>
-            <span className="text-lg sm:text-xl md:text-2xl font-semibold text-black mb-2">
-              {product.name}{" "}
-            </span>
-            <span className="text-lg sm:text-xl md:text-2xl font-semibold text-orange-500 mb-2">
-              {title}
-            </span>
-          </>
-        )}
         <div className="blog-content bg-white p-4 rounded-lg prose prose-lg mt-1 max-w-none">
+          
+          {showTitle && (
+            <h2 className="mb-3 ml-4 not-prose">
+              <span className="text-lg sm:text-xl md:text-2xl font-semibold text-black">
+                {product.name}{" "}
+              </span>
+              <span className="text-lg sm:text-xl md:text-2xl font-semibold text-orange-500">
+                {title}
+              </span>
+            </h2>
+          )}
+  
           <div dangerouslySetInnerHTML={{ __html: truncated }} />
+  
           {shouldTruncate && (
             <button
               onClick={() => toggleSection(key)}
-              className="text-orange-500 font-semibold mt-2"
+              className="text-orange-500 font-semibold mt-2 ml-6"
             >
               {isExpanded ? "Read Less" : "Read More"}
             </button>
@@ -80,6 +65,7 @@ const Content = ({ product, thingsToCarry, howToReach }) => {
       </div>
     );
   };
+  
 
   return (
     <div className="pt-6 w-full">
@@ -93,50 +79,59 @@ const Content = ({ product, thingsToCarry, howToReach }) => {
 
       {/* 3. Things to Carry */}
       {thingsToCarry && (
-        <div className="w-full mx-auto mb-6">
-          <span className="text-lg sm:text-xl md:text-2xl font-semibold text-black mb-2">
-            {product.name}{" "}
-          </span>
-          <span className="text-lg sm:text-xl md:text-2xl font-semibold text-orange-500 mb-2">
-            Things to Carry
-          </span>
-          <div className="blog-content bg-white p-4 rounded-lg prose prose-lg mt-1 max-w-none">
-            {Array.isArray(thingsToCarry) ? (
-              <ul className="list-disc pl-5">
-                {(expandedSections["carry"]
-                  ? thingsToCarry
-                  : thingsToCarry.slice(0, 10)
-                ).map((item, index) => (
-                  <li key={index}>{item}</li>
-                ))}
-              </ul>
-            ) : (
-              <div
-                dangerouslySetInnerHTML={{
-                  __html:
-                    countWords(thingsToCarry) > MAX_WORDS &&
-                    !expandedSections["carry"]
-                      ? thingsToCarry.split(" ").slice(0, MAX_WORDS).join(" ") +
-                        "..."
-                      : thingsToCarry,
-                }}
-              />
-            )}
-            {countWords(
-              Array.isArray(thingsToCarry)
-                ? thingsToCarry.join(" ")
-                : thingsToCarry
-            ) > MAX_WORDS && (
-              <button
-                onClick={() => toggleSection("carry")}
-                className="text-orange-500 font-semibold mt-2"
-              >
-                {expandedSections["carry"] ? "Read Less" : "Read More"}
-              </button>
-            )}
-          </div>
-        </div>
+  <div className="w-full mx-auto mb-6">
+    <div className="blog-content bg-white p-4 rounded-lg prose prose-lg mt-1 max-w-none">
+
+      {/* Heading INSIDE white box */}
+      <h2 className="mb-3 not-prose ml-3">
+        <span className="text-lg sm:text-xl md:text-2xl font-semibold text-black">
+          {product.name}{" "}
+        </span>
+        <span className="text-lg sm:text-xl md:text-2xl font-semibold text-orange-500">
+          Things to Carry
+        </span>
+      </h2>
+
+      {Array.isArray(thingsToCarry) ? (
+        <ul className="list-disc pl-5">
+          {(expandedSections["carry"]
+            ? thingsToCarry
+            : thingsToCarry.slice(0, 10)
+          ).map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
+      ) : (
+        <div
+          dangerouslySetInnerHTML={{
+            __html:
+              countWords(thingsToCarry) > MAX_WORDS &&
+              !expandedSections["carry"]
+                ? thingsToCarry
+                    .split(" ")
+                    .slice(0, MAX_WORDS)
+                    .join(" ") + "..."
+                : thingsToCarry,
+          }}
+        />
       )}
+
+      {countWords(
+        Array.isArray(thingsToCarry)
+          ? thingsToCarry.join(" ")
+          : thingsToCarry
+      ) > MAX_WORDS && (
+        <button
+          onClick={() => toggleSection("carry")}
+          className="text-orange-500 font-semibold mt-2 ml-4"
+        >
+          {expandedSections["carry"] ? "Read Less" : "Read More"}
+        </button>
+      )}
+    </div>
+  </div>
+)}
+
 
       {/* 4. Got a Question - Contact Card */}
       <div className="md:hidden bg-white border border-orange-500 rounded-lg shadow-md p-4 mb-4 md:mb-0 md:mt-10 sm:p-5">
@@ -187,51 +182,29 @@ const Content = ({ product, thingsToCarry, howToReach }) => {
 
       {/* 7. FAQ */}
       {product.faq && (
-        <div className="w-full mx-auto">
-          <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-black mb-2">
-            {product.name} <span className="text-orange-500">FAQ</span>
-          </h2>
-          {isFaqJson && faqData && faqData.length > 0 ? (
-            faqData.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-3 sm:gap-6 mt-4 bg-white p-4 rounded-lg"
-              >
-                <div className="h-8 w-8 sm:h-10 sm:w-10 aspect-square text-white rounded-full flex justify-center items-center bg-gradient-to-r from-[rgb(255,99,33)] text-sm sm:text-xl to-amber-400 flex-shrink-0">
-                  {index + 1}
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-base sm:text-lg md:text-xl">
-                    {item.question}
-                  </h3>
-                  <p className="text-sm sm:text-base">
-                    {countWords(item.answer) > MAX_WORDS &&
-                    !expandedSections[`faq-${index}`]
-                      ? item.answer
-                          .split(" ")
-                          .slice(0, MAX_WORDS)
-                          .join(" ") + "..."
-                      : item.answer}
-                  </p>
-                  {countWords(item.answer) > MAX_WORDS && (
-                    <button
-                      onClick={() => toggleSection(`faq-${index}`)}
-                      className="text-orange-500 font-semibold mt-2"
-                    >
-                      {expandedSections[`faq-${index}`]
-                        ? "Read Less"
-                        : "Read More"}
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))
-          ) : (
-            // FIX: Do NOT render duplicate title here
-            renderSection("faqHtml", "", product.faq, false)
-          )}
-        </div>
+        <FAQ
+          productName={product.name}
+          faq={product.faq}
+        />
       )}
+
+      {
+        product.itineraries && (
+
+          <ItineraryTimeline itineraries={product.itineraries} />
+        )
+      }
+
+{
+  product.packages &&
+  typeof product.packages === "object" &&
+  Object.keys(product.packages).length > 0 && (
+    <PackageShowcase packages={product.packages} />
+  )
+}
+
+
+
     </div>
   );
 };

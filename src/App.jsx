@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import { Toaster } from 'react-hot-toast';
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import ContactUs from "./pages/ContactUs";
@@ -50,7 +51,8 @@ const App = () => {
     <div className="flex flex-col min-h-screen"> {/* 👈 THIS WAS MISSING */}
       <Header />
       <Navbar />
-      
+
+      <Toaster position="top-center" gutter={12} containerStyle={{ margin: '16px' }} />
       {/*  MAIN CONTENT AREA - flex-1 pushes footer down */}
       <main className="flex-1"> 
         <Scrolltotop />
