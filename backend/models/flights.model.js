@@ -39,6 +39,13 @@ const flightSchema = new mongoose.Schema(
     airline: {
       type: String,
     },
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+    
     bookingReference: {
       type: String,
       unique: true,

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { flight } from "../api/flight.api";
+import { useAuth } from "../context/AuthContext";
 
 const FlightsForm = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     fromCity: "",
     toCity: "",
@@ -29,7 +31,12 @@ const FlightsForm = () => {
         alert("Failed to book flight.");
       }
     } catch (error) {
-      alert(error.response?.data?.message || "Please login first");
+      const errorMessage = error.response?.data?.message;
+      if (!user && !errorMessage) {
+        alert("Please login first");
+      } else {
+        alert(errorMessage || "An error occurred. Please try again.");
+      }
     }
 
     setFormData({

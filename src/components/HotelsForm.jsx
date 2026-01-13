@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { hotelBooking } from "../api/hotel.api"; // Correct API import
+import { useAuth } from "../context/AuthContext";
 
 const HotelForm = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     city: "",
     property: "",
     checkInDate: "",
     checkOutDate: "",
     guests: "",
-    price: "",
+    budget: "",
   });
 
   const [showMobileForm, setShowMobileForm] = useState(false);
@@ -27,10 +29,12 @@ const HotelForm = () => {
         alert("Failed to book hotel.");
       }
     } catch (error) {
-      alert(
-        error.response?.data?.message ||
-          "Please login First"
-      );
+      const errorMessage = error.response?.data?.message;
+      if (!user && !errorMessage) {
+        alert("Please login First");
+      } else {
+        alert(errorMessage || "An error occurred. Please try again.");
+      }
     }
     setFormData({
       city: "",
@@ -38,7 +42,7 @@ const HotelForm = () => {
       checkInDate: "",
       checkOutDate: "",
       guests: "",
-      price: "",
+      budget: "",
     });
     setShowMobileForm(false);
   };
@@ -49,7 +53,7 @@ const HotelForm = () => {
     checkInDate: "Check-In",
     checkOutDate: "Check-Out",
     guests: "Guests",
-    price: "Budget (in ₹)",
+    budget: "Budget (in ₹)",
   };
 
   const placeholders = {
@@ -58,7 +62,7 @@ const HotelForm = () => {
     checkInDate: "Select date",
     checkOutDate: "Select date",
     guests: "No. of guests",
-    price: "Enter budget",
+    budget: "Enter budget",
   };
 
   return (

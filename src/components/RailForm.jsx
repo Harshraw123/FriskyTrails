@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { railTicket } from "../api/railTicket.api";
+import { useAuth } from "../context/AuthContext";
 
 const RailForm = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     fromStation: "",
     toStation: "",
@@ -9,6 +11,7 @@ const RailForm = () => {
     returnDate: "",
     travelClass: "",
     passengers: "",
+    // price: "",
   });
 
   const [showMobileForm, setShowMobileForm] = useState(false);
@@ -21,16 +24,15 @@ const RailForm = () => {
     e.preventDefault();
     try {
       const response = await railTicket(formData);
-      if (response.success) {
-        alert("Rail ticket booked successfully!");
-      } else {
-        alert("Failed to book rail ticket.");
-      }
+      if (response.success) alert("Rail ticket booked successfully!");
+      else alert("Failed to book rail ticket.");
     } catch (error) {
-      alert(
-        error.response?.data?.message ||
-          "Please login first"
-      );
+      const errorMessage = error.response?.data?.message;
+      if (!user && !errorMessage) {
+        alert("Please login first");
+      } else {
+        alert(errorMessage || "An error occurred. Please try again.");
+      }
     }
 
     setFormData({
@@ -40,8 +42,8 @@ const RailForm = () => {
       returnDate: "",
       travelClass: "",
       passengers: "",
+      // price: "",
     });
-
     setShowMobileForm(false);
   };
 
@@ -49,116 +51,111 @@ const RailForm = () => {
     fromStation: "From",
     toStation: "To",
     departureDate: "Departure",
-    returnDate: "Return (Optional)",
+    returnDate: "Return",
     travelClass: "Class",
-    passengers: "Guests",
+    passengers: "Passengers",
+    // price: "Price (₹)",
   };
 
   const placeholders = {
-    fromStation: "Enter departure station",
-    toStation: "Enter destination station",
-    departureDate: "Select departure date",
-    returnDate: "Select return date",
-    passengers: "No. of passengers",
+    fromStation: "From station",
+    toStation: "To station",
+    passengers: "Passengers",
+    // price: "Price",
   };
 
   return (
     <>
-      {/* ============ Tablet/Desktop Form ============ */}
-      <div className="hidden md:block bg-white h-auto w-[90vw] rounded-lg z-20 absolute bottom-40 lg:bottom-60 xl:bottom-20 left-1/2 transform -translate-x-1/2 shadow-lg px-10 py-4">
-        <h2 className="text-2xl text-orange-400 font-bold pb-4 text-center">
-          Rail Tickets
-        </h2>
+      {/* ========== Desktop / Tablet ========= */}
+      <div className="hidden md:flex lg:mb-10  bg-white w-[88vw] rounded-lg z-20 absolute bottom-40 lg:bottom-60 xl:bottom-20 left-1/2 transform -translate-x-1/2 shadow-md px-6 py-3">
+        <div className="w-full">
+          <h2 className="text-2xl text-orange-400 font-bold pb-4 text-center">
+            Rail Tickets
+          </h2>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col md:flex-row md:flex-wrap gap-4 md:gap-6 justify-center items-center w-full xl:flex-nowrap xl:gap-10"
-        >
-          {Object.keys(formData).map((field, index) => (
-            <div className="w-full md:w-[30%]" key={index}>
-              <label className="block font-semibold mb-1 pl-1">
-                {labels[field]}
-              </label>
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-8 gap-3 items-end w-full"
+          >
+            {Object.keys(formData).map((field, index) => (
+              <div className="flex flex-col" key={index}>
+                <label className="block text-xs font-semibold mb-1 pl-1">
+                  {labels[field]}
+                </label>
 
-              {field === "travelClass" ? (
-                <select
-                  name={field}
-                  value={formData[field]}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400"
-                  required
-                >
-                  <option value="">Select Class</option>
-                  <option value="Sleeper">Sleeper</option>
-                  <option value="AC">AC</option>
-                  <option value="General">General</option>
-                </select>
-              ) : (
-                <input
-                  type={
-                    ["departureDate", "returnDate"].includes(field)
-                      ? "date"
-                      : field === "passengers"
-                      ? "number"
-                      : "text"
-                  }
-                  name={field}
-                  placeholder={placeholders[field]}
-                  value={formData[field]}
-                  onChange={handleChange}
-                  min={
-                    ["departureDate", "returnDate"].includes(field)
-                      ? new Date().toISOString().split("T")[0]
-                      : "0"
-                  }
-                  className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400"
-                  required={field !== "returnDate"}
-                />
-              )}
-            </div>
-          ))}
+                {field === "travelClass" ? (
+                  <select
+                    name={field}
+                    value={formData[field]}
+                    onChange={handleChange}
+                    className="w-full p-2 text-sm border rounded-lg focus:ring-2 focus:ring-amber-400"
+                    required
+                  >
+                    <option value="">Class</option>
+                    <option value="Sleeper">Sleeper</option>
+                    <option value="AC">AC</option>
+                    <option value="General">General</option>
+                  </select>
+                ) : (
+                  <input
+                    type={
+                      ["departureDate", "returnDate"].includes(field)
+                        ? "date"
+                        : ["passengers", "price"].includes(field)
+                        ? "number"
+                        : "text"
+                    }
+                    name={field}
+                    placeholder={placeholders[field]}
+                    value={formData[field]}
+                    onChange={handleChange}
+                    min={0}
+                    className="w-full p-2 text-sm border rounded-lg focus:ring-2 focus:ring-amber-400"
+                    required={field !== "returnDate"}
+                  />
+                )}
+              </div>
+            ))}
 
-          <div className="w-full md:w-auto">
             <button
               type="submit"
-              className=" mt-10 bg-gradient-to-r from-[rgb(255,99,33)] to-amber-400 hover:scale-95 py-3 px-6  xl:mt-6 text-white rounded-xl font-semibold w-full"
+              className="bg-gradient-to-r from-[rgb(255,99,33)] to-amber-400 hover:scale-95 px-4 py-2.5 text-white rounded-lg text-sm font-semibold col-span-1 md:col-span-1"
             >
               Submit
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
 
-      {/* ============ Mobile Trigger Button ============ */}
-      <div className="md:hidden relative text-center bottom-10 z-10">
+      {/* ========== Mobile Trigger ========= */}
+      <div className="md:hidden text-center bottom-10 relative z-10">
         <button
           onClick={() => setShowMobileForm(true)}
-          className="bg-gradient-to-r from-[rgb(255,99,33)] to-amber-400 hover:bg-amber-400 text-white px-6 py-3 rounded-xl shadow-md font-semibold"
+          className="bg-gradient-to-r from-[rgb(255,99,33)] to-amber-400 text-white px-5 py-2.5 rounded-lg text-sm font-semibold"
         >
-          Book My Tickets
+          Book Tickets
         </button>
       </div>
 
-      {/* ============ Mobile Popup Form - ✅ SAME TOP MARGIN ✅ */}
+      {/* ========== Mobile Modal ========= */}
       {showMobileForm && (
-        <div className="md:hidden fixed inset-0 z-30 bg-black/40 flex items-center justify-center pt-16 md:pt-0">
-          {/* Compact, scrollable modal for small screens */}
-          <div className="relative w-[90vw] max-w-sm max-h-[80vh] bg-white rounded-xl shadow-xl px-4 py-6 overflow-y-auto border border-gray-200">
+        <div className="md:hidden fixed inset-0 z-30 bg-black/40 flex items-center justify-center pt-12">
+          <div className="relative w-[90vw] max-w-sm max-h-[75vh] bg-white rounded-lg shadow-xl px-4 py-4 overflow-y-auto">
             <button
-              className="absolute top-3 right-4 text-2xl font-bold text-gray-500 hover:text-red-500 p-2"
+              className="absolute top-2 right-3 text-xl font-bold text-gray-500"
               onClick={() => setShowMobileForm(false)}
             >
-              &times;
+              ×
             </button>
 
-            <h2 className="text-xl text-orange-400 font-bold pb-4 text-center pt-10">
+            <h2 className="text-lg text-orange-400 font-bold text-center pt-6">
               Rail Tickets
             </h2>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full mt-4">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-2 mt-3">
               {Object.keys(formData).map((field, index) => (
-                <div className="w-full" key={index}>
-                  <label className="block font-semibold mb-1 pl-1 text-sm">
+                <div key={index}>
+                  <label className="block text-xs font-semibold mb-1">
                     {labels[field]}
                   </label>
 
@@ -167,10 +164,10 @@ const RailForm = () => {
                       name={field}
                       value={formData[field]}
                       onChange={handleChange}
-                      className="w-full p-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm"
+                      className="w-full p-2 text-sm border rounded-lg focus:ring-2 focus:ring-amber-400"
                       required
                     >
-                      <option value="">Select Class</option>
+                      <option value="">Class</option>
                       <option value="Sleeper">Sleeper</option>
                       <option value="AC">AC</option>
                       <option value="General">General</option>
@@ -180,21 +177,17 @@ const RailForm = () => {
                       type={
                         ["departureDate", "returnDate"].includes(field)
                           ? "date"
-                          : field === "passengers"
+                          : ["passengers", "price"].includes(field)
                           ? "number"
                           : "text"
                       }
                       name={field}
-                      placeholder={placeholders[field]}
                       value={formData[field]}
                       onChange={handleChange}
-                      min={
-                        ["departureDate", "returnDate"].includes(field)
-                          ? new Date().toISOString().split("T")[0]
-                          : "0"
-                      }
-                      className="w-full p-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm"
+                      min={0}
+                      className="w-full p-2 text-sm border rounded-lg focus:ring-2 focus:ring-amber-400"
                       required={field !== "returnDate"}
+                      placeholder={placeholders[field]}
                     />
                   )}
                 </div>
@@ -202,7 +195,7 @@ const RailForm = () => {
 
               <button
                 type="submit"
-                className="bg-gradient-to-r from-[rgb(255,99,33)] to-amber-400 hover:scale-95 py-3 px-6 mt-2 text-white rounded-xl font-semibold w-full text-sm"
+                className="bg-gradient-to-r from-[rgb(255,99,33)] to-amber-400 py-2.5 text-white rounded-lg text-sm font-semibold mt-2"
               >
                 Submit
               </button>

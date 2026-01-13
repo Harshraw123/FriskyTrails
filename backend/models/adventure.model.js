@@ -30,6 +30,18 @@ const adventureSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+   
+      email: {
+        type: String,
+        required: true,
+        lowercase: true,
+        trim: true,
+      },
+
   },
   { timestamps: true }
 );

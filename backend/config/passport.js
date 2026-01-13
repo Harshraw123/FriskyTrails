@@ -1,6 +1,8 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import User from "../models/user.model.js";
+import { pushToSheet } from "../utils/pushToSheet.js";
+import { sheetConfig } from "./sheetConfig.js";
 
 const configurePassport = () => {
  
@@ -50,12 +52,24 @@ const configurePassport = () => {
 
           if (user) {
             // Link google account
+            const isNewUser = !user.googleId; // Track if this is first time linking
             user.googleId = googleId;
             if (!user.avatar && avatar) {
               user.avatar = avatar;
             }
 
             await user.save();
+            
+            // Sync to sheet if this is first time linking Google account
+            if (isNewUser) {
+              const config = sheetConfig.User;
+              await pushToSheet({
+                sheetName: config.sheetName,
+                columns: config.columns,
+                document: user,
+              });
+            }
+            
             return done(null, user);
           }
 
@@ -67,6 +81,14 @@ const configurePassport = () => {
             avatar,
             isVerified: true, // Google = Verified by default
             userName: generatedUserName,
+          });
+
+          // Sync new Google OAuth user to sheet
+          const config = sheetConfig.User;
+          await pushToSheet({
+            sheetName: config.sheetName,
+            columns: config.columns,
+            document: user,
           });
 
           return done(null, user);
