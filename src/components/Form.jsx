@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { adventure } from "../api/adventure.api";
+import { useAuth } from "../context/AuthContext";
 
 const Form = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     from: "",
     to: "",
@@ -27,7 +29,12 @@ const Form = () => {
         alert("Failed to book adventure.");
       }
     }catch (error) {
-      alert(error.response?.data?.message || 'Please login first');
+      const errorMessage = error.response?.data?.message;
+      if (!user && !errorMessage) {
+        alert('Please login first');
+      } else {
+        alert(errorMessage || "An error occurred. Please try again.");
+      }
     }
     setFormData({
       from: "",

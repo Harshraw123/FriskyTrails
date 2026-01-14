@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { createActivity } from "../api/activities.api";
+import { useAuth } from "../context/AuthContext";
 
 const ActivitiesForm = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     activityType: "",
     activityLocation: "",
@@ -34,11 +36,12 @@ const ActivitiesForm = () => {
       }
     } catch (error) {
       console.error("Activity submit error:", error);
-      alert(
-        error?.message || error?.data?.message ||
-          error?.response?.data?.message ||
-          "Please login first"
-      );
+      const errorMessage = error?.message || error?.data?.message || error?.response?.data?.message;
+      if (!user && !errorMessage) {
+        alert("Please login first");
+      } else {
+        alert(errorMessage || "An error occurred. Please try again.");
+      }
     }
     setFormData({
       activityType: "",

@@ -28,6 +28,7 @@ const CreateProductPage = () => {
     city: "",
     reviews: "",
     rating: "",
+    itineraries: "",
   });
 
   const [images, setImages] = useState([]);
@@ -39,6 +40,53 @@ const CreateProductPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAllowed, setIsAllowed] = useState(true);
   const [loading, setLoading] = useState(true);
+
+
+
+//package 
+const [packages, setPackages] = useState([
+  {
+    name: "",
+    price: "",
+    actualPrice: "",
+    features: [""],
+    isPopular: false,
+  },
+]);
+const handlePackageChange = (index, field, value) => {
+  const updated = [...packages];
+  updated[index][field] = value;
+  setPackages(updated);
+};
+
+const handleFeatureChange = (pkgIndex, featureIndex, value) => {
+  const updated = [...packages];
+  updated[pkgIndex].features[featureIndex] = value;
+  setPackages(updated);
+};
+
+const addFeature = (pkgIndex) => {
+  const updated = [...packages];
+  updated[pkgIndex].features.push("");
+  setPackages(updated);
+};
+
+const addPackage = () => {
+  if (packages.length >= 5)
+    return alert("You can add up to 5 packages only");
+
+  setPackages([
+    ...packages,
+    { name: "", price: "", actualPrice: "", features: [""], isPopular: false },
+  ]);
+};
+
+const removePackage = (index) => {
+  setPackages(packages.filter((_, i) => i !== index));
+};
+
+
+
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -138,13 +186,19 @@ const CreateProductPage = () => {
     e.preventDefault();
     try {
       const formObj = new FormData();
-      for (const key in formData) formObj.append(key, formData[key]);
+  
+      for (const key in formData) {
+        formObj.append(key, formData[key]);
+      }
+  
+      // IMPORTANT: send packages as JSON
+      formObj.append("packages", JSON.stringify(packages));
+  
       images.forEach((f) => formObj.append("images", f));
-
-      const res = await createProduct(formObj);
-      console.log(res);
+  
+      await createProduct(formObj);
       alert("Product created successfully!");
-
+    
       // Reset form
       setFormData({
         name: "",
@@ -163,6 +217,7 @@ const CreateProductPage = () => {
         city: "",
         reviews: "",
         rating: "",
+        itineraries: "",
       });
       setImages([]);
       setPreviews([]);
@@ -344,6 +399,7 @@ const CreateProductPage = () => {
             />
           </div>
 
+
           {/* <div>
             <label className="block mb-1 font-semibold text-gray-700">
               Things to Carry
@@ -355,6 +411,20 @@ const CreateProductPage = () => {
               }
             />
           </div> */}
+
+
+<div>
+  <label className="block mb-1 font-semibold text-gray-700">
+    Itineraries
+  </label>
+  <Editor
+    content={formData.itineraries}
+    onChange={(c) =>
+      setFormData((p) => ({ ...p, itineraries: c }))  
+    }
+  />
+</div>
+
 
           <div>
             <label className="block mb-1 font-semibold text-gray-700">
@@ -378,6 +448,103 @@ const CreateProductPage = () => {
             />
           </div>
         </div>
+
+
+
+{/* Packages */}
+<div className="space-y-6">
+  <h3 className="text-lg font-semibold text-gray-800">
+    Package Options
+  </h3>
+
+  {packages.map((pkg, index) => (
+    <div key={index} className="border rounded-lg p-4 space-y-3">
+      <div className="flex gap-3">
+        <input
+          type="text"
+          placeholder="Package Name (e.g. Basic)"
+          value={pkg.name}
+          onChange={(e) =>
+            handlePackageChange(index, "name", e.target.value)
+          }
+          className="p-2 border rounded w-full"
+        />
+
+        <input
+          type="number"
+          placeholder="Offer Price"
+          value={pkg.price}
+          onChange={(e) =>
+            handlePackageChange(index, "price", e.target.value)
+          }
+          className="p-2 border rounded w-full"
+        />
+
+        <input
+          type="number"
+          placeholder="Actual Price"
+          value={pkg.actualPrice}
+          onChange={(e) =>
+            handlePackageChange(index, "actualPrice", e.target.value)
+          }
+          className="p-2 border rounded w-full"
+        />
+      </div>
+
+      {/* Features */}
+      <div className="space-y-2">
+        {pkg.features.map((f, fIndex) => (
+          <input
+            key={fIndex}
+            type="text"
+            placeholder="Feature"
+            value={f}
+            onChange={(e) =>
+              handleFeatureChange(index, fIndex, e.target.value)
+            }
+            className="p-2 border rounded w-full"
+          />
+        ))}
+        <button
+          type="button"
+          onClick={() => addFeature(index)}
+          className="text-sm text-orange-600 font-semibold"
+        >
+          + Add Feature
+        </button>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={pkg.isPopular}
+            onChange={(e) =>
+              handlePackageChange(index, "isPopular", e.target.checked)
+            }
+          />
+          Most Popular
+        </label>
+
+        <button
+          type="button"
+          onClick={() => removePackage(index)}
+          className="text-red-500 text-sm"
+        >
+          Remove Package
+        </button>
+      </div>
+    </div>
+  ))}
+
+  <button
+    type="button"
+    onClick={addPackage}
+    className="text-orange-600 font-semibold"
+  >
+    + Add Package
+  </button>
+</div>
 
 
         {/* Images */}

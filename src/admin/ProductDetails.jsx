@@ -16,6 +16,7 @@ import Content from "../Productpage/Content";
 import BookingModal from "../components/BookingModal";
 import Choose from "../sections/Choose";
 import FriskyLoader from "../components/Loader";
+import { MapPin } from "lucide-react";
 
 const ProductDetails = () => {
   const { slug } = useParams();
@@ -31,11 +32,11 @@ const ProductDetails = () => {
   ===================== */
   const handleShare = async () => {
     try {
-      const url = `https://frisky-trails.vercel.app/tours/${slug}`;
+      const url = `https://www.friskytrails.in//tours/${slug}`;
       await navigator.clipboard.writeText(url);
       toast.success("Link copied to clipboard!");
     } catch (error) {
-      toast.error("Failed to copy link");
+      toast.error("Failed to copy link",error);
     }
   };
 
@@ -99,11 +100,11 @@ const ProductDetails = () => {
   return (
     <div className="min-h-screen w-full">
       {/* TOASTER (ADDED) */}
-      <Toaster position="top-center" />
+
 
       {/* Breadcrumb */}
       <div className="w-[95%] sm:w-[90%] md:w-[85%] lg:w-[80%] mt-25 lg:mt-30  m-auto px-4">
-        <div className="flex items-center pt-4 sm:pt-6 flex-wrap gap-2">
+        {/* <div className="flex items-center pt-4 sm:pt-6 flex-wrap gap-2">
           <h3 className="font-semibold text-sm sm:text-base">Home</h3>
           <img className="h-3 w-3 sm:h-4 sm:w-4 mt-1" src={Right} alt="rightarrow" />
           <h3 className="font-semibold text-sm sm:text-base">Products</h3>
@@ -111,20 +112,21 @@ const ProductDetails = () => {
           <h3 className="font-semibold text-gray-600 text-sm sm:text-base truncate">
             {product.name}
           </h3>
-        </div>
+        </div> */}
 
-        <h1 className="text-xl sm:text-2xl md:text-3xl tracking-tighter font-bold pt-4">
+        <h1 className="text-xl sm:text-2xl  md:text-3xl tracking-tighter font-bold pt-6">
           {product.name}
         </h1>
 
         <div className="flex flex-col sm:flex-row sm:justify-between gap-4 pt-2">
           <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
             <h3 className="text-gray-500 text-sm sm:text-base">
-              {"⭐".repeat(product.rating || 5)} ({product.reviews || 0} Reviews)
+              ⭐ {product.rating} ({product.reviews || 0} Reviews)
             </h3>
-            <h3 className="text-gray-500 text-sm sm:text-base">
-              {product.city?.name}, {product.state?.name}
-            </h3>
+            <h3 className="flex items-center gap-1 text-gray-500 text-sm sm:text-base">
+  <MapPin size={16} className="text-gray-500" />
+  {product.city?.name}, {product.state?.name}
+</h3>
           </div>
 
           {/* SHARE BUTTON (onClick ADDED) */}
@@ -239,7 +241,7 @@ const ProductDetails = () => {
             <div className="hidden lg:block bg-white border border-orange-500 rounded-lg shadow-md overflow-hidden">
               <div className="bg-orange-500 py-4 relative">
                 <span className="text-white absolute right-2 top-1 text-xs sm:text-sm md:text-base">
-                  Save upto 50%
+                  Save 28.58%
                 </span>
               </div>
               <div className="p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-center gap-4">

@@ -20,7 +20,20 @@ const activitySchema = new mongoose.Schema(
     },
     description: {
       type: String,
-    }
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+   
+
+
   },
   { timestamps: true }
 );

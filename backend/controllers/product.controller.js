@@ -8,7 +8,9 @@ import mongoose from "mongoose";
 
 console.log("Controller loaded");
 
+// ============================
 // Create Product
+// ============================
 export const createProduct = asyncHandler(async (req, res) => {
   const {
     name,
@@ -21,12 +23,14 @@ export const createProduct = asyncHandler(async (req, res) => {
     description,
     productHighlights,
     productOverview,
+    itineraries, // 👈 ADDED
     thingsToCarry,
     additionalInfo,
     faq,
     country,
     state,
     city,
+    packages,
   } = req.body;
 
   if (!name || !slug || !productType || !offerPrice || !actualPrice) {
@@ -47,6 +51,16 @@ export const createProduct = asyncHandler(async (req, res) => {
       throw new ApiError(400, "You can upload up to 5 images only");
   }
 
+  // Parse packages safely
+  let parsedPackages = [];
+  if (packages) {
+    try {
+      parsedPackages = JSON.parse(packages);
+    } catch (err) {
+      throw new ApiError(400, "Invalid packages format");
+    }
+  }
+
   // Helper: clean optional ObjectId fields
   const cleanObjectId = (value) => (value ? value : undefined);
 
@@ -61,13 +75,15 @@ export const createProduct = asyncHandler(async (req, res) => {
     description,
     productHighlights,
     productOverview,
+    itineraries, // 👈 SAVED
     thingsToCarry,
     additionalInfo,
     faq,
-    images, // Cloudinary URLs
-    country, // required
-    state: cleanObjectId(state), // optional
-    city: cleanObjectId(city),   // optional
+    images,
+    packages: parsedPackages,
+    country,
+    state: cleanObjectId(state),
+    city: cleanObjectId(city),
   });
 
   res
@@ -75,63 +91,71 @@ export const createProduct = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, product, "✅ Product created successfully"));
 });
 
-
+// ============================
 // Get All Products
+// ============================
 export const getProducts = asyncHandler(async (req, res) => {
   const products = await Product.find()
     .populate("country state city", "name slug")
-    .select("name slug productType rating reviews offerPrice actualPrice images city createdAt");
+    .select(
+      "name slug productType rating reviews offerPrice actualPrice images city packages createdAt"
+    );
 
-  res.status(200).json(new ApiResponse(200, products, "Products fetched successfully"));
+  res
+    .status(200)
+    .json(new ApiResponse(200, products, "Products fetched successfully"));
 });
 
+// ============================
 // Get Product By Slug
+// ============================
 export const getProductBySlug = asyncHandler(async (req, res) => {
   const { slug } = req.params;
-  console.log(slug)
 
   const product = await Product.findOne({ slug })
-  .populate("country state city productType", "name slug")
-  .select("-__v");
+    .populate("country state city productType", "name slug")
+    .select("-__v"); // 👈 Now includes itineraries automatically
+
   if (!product) throw new ApiError(404, "Product not found");
 
-  res.status(200).json(new ApiResponse(200, product, "Product fetched successfully"));
+  res
+    .status(200)
+    .json(new ApiResponse(200, product, "Product fetched successfully"));
 });
 
-
+// ============================
+// Get Product By ID
+// ============================
 export const getProductById = asyncHandler(async (req, res) => {
-  try {
-    console.log(req.params);
-    const { id } = req.params;
-    console.log("Fetching product with ID:", id);
+  const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ success: false, message: "Invalid product ID" });
-    }
-
-    const product = await Product.findById(id)
-      .populate("country", "name slug")
-      .populate("state", "name slug")
-      .populate("city", "name slug")
-      .populate("productType", "name slug")
-      .select("-__v")
-      .lean();
-
-    if (!product) {
-      console.error(`Product with ID ${id} not found`);
-      return res.status(404).json({ success: false, message: "Product not found" });
-    }
-
-    res.status(200).json({ success: true, data: product, message: "Product fetched successfully" });
-  } catch (err) {
-    console.error("Error fetching product:", err);
-    res.status(500).json({ success: false, message: "Internal Server Error", error: err.message });
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, "Invalid product ID");
   }
+
+  const product = await Product.findById(id)
+    .populate("country", "name slug")
+    .populate("state", "name slug")
+    .populate("city", "name slug")
+    .populate("productType", "name slug")
+    .select("-__v") // 👈 Now includes itineraries automatically
+    .lean();
+
+  if (!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, product, "Product fetched successfully"));
 });
 
-// Update product by slug
+// ============================
+// Update Product By Slug
+// ============================
 export const updateProduct = asyncHandler(async (req, res) => {
   const { slug } = req.params;
+
   const {
     name,
     offerPrice,
@@ -139,28 +163,31 @@ export const updateProduct = asyncHandler(async (req, res) => {
     productType,
     rating,
     reviews,
+    description,
     productHighlights,
     productOverview,
+    itineraries, // 👈 ADDED
+    thingsToCarry,
     additionalInfo,
     faq,
     country,
     state,
     city,
+    packages,
   } = req.body;
 
-  // Find existing product
   const product = await Product.findOne({ slug });
   if (!product) throw new ApiError(404, "Product not found");
 
-  // Update cover images if new files uploaded
+  // Upload new images
   if (req.files?.length) {
-    if (req.files.length + product.images.length > 5)
+    if (req.files.length + product.images.length > 5) {
       throw new ApiError(400, "You can upload up to 5 images only");
+    }
 
-    // Upload new images to cloudinary
     const uploadedImages = [];
     for (const file of req.files) {
-      const result = await uploadOnCloudinary(file.path);
+      const result = await uploadOnCloudinary(file.buffer);
       if (result?.secure_url) uploadedImages.push(result.secure_url);
     }
 
@@ -175,17 +202,28 @@ export const updateProduct = asyncHandler(async (req, res) => {
   if (offerPrice) product.offerPrice = offerPrice;
   if (actualPrice) product.actualPrice = actualPrice;
   if (productType) product.productType = productType;
-  if (rating) product.rating = rating;
-  if (reviews) product.reviews = reviews;
+  if (rating !== undefined) product.rating = rating;
+  if (reviews !== undefined) product.reviews = reviews;
+  if (description) product.description = description;
   if (productHighlights) product.productHighlights = productHighlights;
   if (productOverview) product.productOverview = productOverview;
+  if (itineraries) product.itineraries = itineraries; // 👈 UPDATED
+  if (thingsToCarry) product.thingsToCarry = thingsToCarry;
   if (additionalInfo) product.additionalInfo = additionalInfo;
   if (faq) product.faq = faq;
   if (country) product.country = country;
   if (state) product.state = state;
   if (city) product.city = city;
 
-  // Save
+  // Update packages
+  if (packages) {
+    try {
+      product.packages = JSON.parse(packages);
+    } catch (err) {
+      throw new ApiError(400, "Invalid packages format");
+    }
+  }
+
   await product.save();
 
   res
@@ -193,12 +231,16 @@ export const updateProduct = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, product, "Product updated successfully"));
 });
 
-
+// ============================
 // Delete Product
+// ============================
 export const deleteProduct = asyncHandler(async (req, res) => {
   const { slug } = req.params;
+
   const product = await Product.findOneAndDelete({ slug });
   if (!product) throw new ApiError(404, "Product not found");
 
-  res.status(200).json(new ApiResponse(200, product, "Product deleted successfully"));
+  res
+    .status(200)
+    .json(new ApiResponse(200, product, "Product deleted successfully"));
 });

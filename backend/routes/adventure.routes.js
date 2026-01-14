@@ -29,8 +29,8 @@ router.route("/rail/booking").post(...protectedRoute(railTicket));
 router.route("/bus/booking").post(...protectedRoute(busTicket));
 router.route("/hotel/booking").post(...protectedRoute(hotelBooking));
 router.route("/transport/booking").post(...protectedRoute(transport));
-// Allow public submissions for activities (no auth required)
-router.route("/activity").post(asyncHandler(activity));
+
+router.route("/activity").post(...protectedRoute(activity));
 
 // 404 handler for undefined routes under /api/v1
 router.use((req, res) => {

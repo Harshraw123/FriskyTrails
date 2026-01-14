@@ -1,6 +1,8 @@
 import User from "../models/user.model.js";
 import { generateOTP } from "../utils/generateOtp.js";
 import { sendOTPEmail } from "../utils/sendEmail.js";
+import { pushToSheet } from "../utils/pushToSheet.js";
+import { sheetConfig } from "../config/sheetConfig.js";
 
 export const sendOtp = async (req, res) => {
   try {
@@ -23,8 +25,18 @@ export const sendOtp = async (req, res) => {
     }
 
     let user = await User.findOne({ email: email.toLowerCase() });
+    const isNewUser = !user;
+    
     if (!user) {
       user = await User.create({ email: email.toLowerCase() });
+      
+      // Sync new user to Google Sheet
+      const config = sheetConfig.User;
+      await pushToSheet({
+        sheetName: config.sheetName,
+        columns: config.columns,
+        document: user,
+      });
     }
 
     const otp = generateOTP();

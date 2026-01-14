@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { transport } from "../api/transport.api"; // Correct API import
+import { useAuth } from "../context/AuthContext";
 
 const TransportForm = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     fromLocation: "",
     toLocation: "",
@@ -26,10 +28,12 @@ const TransportForm = () => {
         alert("Failed to book transport.");
       }
     } catch (error) {
-      alert(
-        error.response?.data?.message ||
-          "Please login First"
-      );
+      const errorMessage = error.response?.data?.message;
+      if (!user && !errorMessage) {
+        alert("Please login First");
+      } else {
+        alert(errorMessage || "An error occurred. Please try again.");
+      }
     }
     setFormData({
       fromLocation: "",

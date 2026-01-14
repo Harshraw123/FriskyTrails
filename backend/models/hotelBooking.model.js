@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import crypto from "node:crypto";
 
 const hotelBookingSchema = new mongoose.Schema(
   {
@@ -22,17 +23,33 @@ const hotelBookingSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    property:{
+      type: String,
+      required:true
+    },
     guests: {
       type: Number,
       required: true,
     },
-    price: {
-      type: Number,
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
     },
+    
     bookingReference: {
       type: String,
       unique: true,
+      required: true,
+      default: () =>
+        "HTL-" + crypto.randomBytes(4).toString("hex").toUpperCase(),
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
     }
+    
   },
   { timestamps: true }
 );

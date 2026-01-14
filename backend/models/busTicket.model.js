@@ -36,6 +36,17 @@ const busTicketSchema = new mongoose.Schema(
       default: () =>
         "FL-" + crypto.randomBytes(4).toString("hex").toUpperCase(),
     },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+   
   },
   { timestamps: true }
 );

@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
+import { sheetConfig } from '../config/sheetConfig.js';
+import { pushToSheet } from '../utils/pushToSheet.js';
 
 // Environment variables (set these in your .env file)
 const JWT_SECRET = process.env.JWT_SECRET || process.env.ACCESS_TOKEN_SECRET || 'your-super-secret-jwt-key';
@@ -76,6 +78,7 @@ export const signup = async (req, res) => {
         message: 'Password must be at least 6 characters long',
       });
     }
+ 
 
     // Check if user exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -110,8 +113,22 @@ export const signup = async (req, res) => {
     else if (!existingUser.userName) {
       existingUser.userName = email.split("@")[0];
     }
-    await existingUser.save();
-
+    
+    await existingUser.save(); // ✅ DB first
+    
+    // 🔥 PUSH TO GOOGLE SHEET (AFTER DB SUCCESS)
+    // Only sync if user wasn't already synced (check if user was created before password was set)
+    // Since user was created during OTP flow, it should already be in sheet
+    // But we'll sync again to ensure updated data (with password set) is reflected
+    // Note: This might create a duplicate entry - consider updating existing row instead
+    const config = sheetConfig.User;
+    
+    await pushToSheet({
+      sheetName: config.sheetName,
+      columns: config.columns,
+      document: existingUser,
+    });
+    
     sendTokenResponse(existingUser, 201, res);
   } catch (error) {
     console.error('Signup error:', error);
