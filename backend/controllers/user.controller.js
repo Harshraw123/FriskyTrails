@@ -69,24 +69,50 @@ export const signup = async (req, res) => {
       });
     }
 
-    // Check if user exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
+    // Validate password length (since it's optional in schema for OTP flow)
+    if (password.length < 6) {
       return res.status(400).json({
         success: false,
-        message: 'An account with this email already exists',
+        message: 'Password must be at least 6 characters long',
       });
     }
 
-    // Create user
-    const user = await User.create({
-      email: email.toLowerCase(),
-      userName: userName || email.split("@")[0],
-      password,
-      name,
-    });
+    // Check if user exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    
+    if (!existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please verify your email with OTP first. Send OTP to your email address.',
+      });
+    }
 
-    sendTokenResponse(user, 201, res);
+    // Check if email is verified
+    if (!existingUser.isVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email not verified. Please verify your email with OTP before completing signup.',
+      });
+    }
+
+    // Check if user already has a password (already signed up)
+    if (existingUser.password) {
+      return res.status(400).json({
+        success: false,
+        message: 'An account with this email already exists. Please login instead.',
+      });
+    }
+
+    // Update user with password and other details
+    existingUser.password = password;
+    if (name) existingUser.name = name;
+    if (userName) existingUser.userName = userName;
+    else if (!existingUser.userName) {
+      existingUser.userName = email.split("@")[0];
+    }
+    await existingUser.save();
+
+    sendTokenResponse(existingUser, 201, res);
   } catch (error) {
     console.error('Signup error:', error);
     res.status(500).json({

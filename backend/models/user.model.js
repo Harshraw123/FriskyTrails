@@ -10,13 +10,24 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+
+    otp: String,
+    otpExpiry: Date,
+    
     password: {
       type: String,
-      required: function () {
-        return !this.googleId;
-      },
-      minlength: 6,
+      required: false, // Made optional to allow OTP flow - validation handled in signup controller
+      minlength: 6, // Only validates if password is provided (since required: false)
       select: false,
+      validate: {
+        validator: function(value) {
+          // Only validate if password is provided and user is not a Google OAuth user
+          if (!value) return true; // Allow empty password (for OTP flow)
+          if (this.googleId) return true; // Google OAuth users don't need password
+          return value.length >= 6;
+        },
+        message: 'Password must be at least 6 characters long'
+      }
     },
     userName: { type: String, unique: true, sparse: true, default: undefined },
     name: {
@@ -39,6 +50,8 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+
   },
   {
     timestamps: true,

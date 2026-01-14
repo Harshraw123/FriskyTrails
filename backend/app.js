@@ -3,6 +3,7 @@ const app = express();
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+import authRoutes from "./routes/auth.routes.js";
 // import { app } from "./app.js";
 
 import contactRoutes from "./routes/contact.routes.js";
@@ -84,6 +85,8 @@ app.use("/api/v1/contact", contactRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/admin",adminRoutes);
 app.use("/api/v1/blog", blogRoutes);
+//ye wala otp verification
+app.use("/api/auth", authRoutes);
 
 //harsh
 

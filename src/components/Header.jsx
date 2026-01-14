@@ -58,7 +58,7 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <a href="https://www.facebook.com/friskytrails/" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.facebook.com/friskytrailscommunity/" target="_blank" rel="noopener noreferrer">
             <img className="w-5 h-5" src={Facebook} alt="Facebook" />
           </a>
           <div className="h-5 border-l border-black" />
@@ -66,7 +66,7 @@ const Header = () => {
             <img className="w-5 h-5" src={Twitter} alt="Twitter" />
           </a>
           <div className="h-5 border-l border-black" />
-          <a href="https://www.linkedin.com/company/friskytrails/" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.linkedin.com/company/friskytrailsofficial/" target="_blank" rel="noopener noreferrer">
             <img className="w-5 h-5" src={Linkedin} alt="Linkedin" />
           </a>
           <div className="h-5 border-l border-black" />

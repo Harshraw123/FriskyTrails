@@ -57,5 +57,23 @@ const googleAuth = () => {
   window.location.href = `${apiUrl}/api/v1/user/google`;
 };
 
+// OTP functions for email verification
+const sendOtp = async ({ email }) => {
+  try {
+    const response = await axiosInstance.post("/api/auth/send-otp", { email });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
 
-export { loginUser, registerUser , logoutUser , getCurrentUser, googleAuth };
+const verifyOtp = async ({ email, otp }) => {
+  try {
+    const response = await axiosInstance.post("/api/auth/verify-otp", { email, otp });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+export { loginUser, registerUser , logoutUser , getCurrentUser, googleAuth, sendOtp, verifyOtp };
