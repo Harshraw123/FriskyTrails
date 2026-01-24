@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getProducts } from "../api/admin.api";
+import { getProducts, deleteProduct } from "../api/admin.api";
 import EditProductForm from "./EditProductForm";
 
 const AllProducts = () => {
@@ -19,6 +19,26 @@ const AllProducts = () => {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteProduct = async (productSlug, productName) => {
+    if (!window.confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await deleteProduct(productSlug);
+      if (response.status || response.success) {
+        // Refresh the products list
+        await fetchProducts();
+        alert("Product deleted successfully!");
+      } else {
+        throw new Error(response.message || "Failed to delete product");
+      }
+    } catch (err) {
+      alert(err.message || "Error deleting product");
+      console.error("Error deleting product:", err);
     }
   };
 
@@ -105,13 +125,22 @@ const AllProducts = () => {
                 <p className="text-gray-400 line-through text-sm">₹{product.actualPrice}</p>
               </div>
 
-              <div className="flex justify-between items-center">
-                <button
-                  onClick={() => setSelectedProduct(product)}
-                  className="text-sm text-white bg-green-500 hover:bg-green-600 px-3 py-1 rounded-md"
-                >
-                  ✏️ Edit
-                </button>
+              <div className="flex justify-between items-center gap-2">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSelectedProduct(product)}
+                    className="text-sm text-white bg-green-500 hover:bg-green-600 px-3 py-1 rounded-md"
+                  >
+                    ✏️ Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteProduct(product.slug, product.name)}
+                    className="text-sm text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md"
+                    title="Delete"
+                  >
+                    🗑️
+                  </button>
+                </div>
                 <a
                   href={`/tours/${product.slug}`}
                   className="text-blue-600 hover:text-blue-800 text-sm font-medium"

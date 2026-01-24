@@ -26,7 +26,7 @@ const Blog = () => {
   }
 
   return (
-    <div className="w-full mt-23 md:mt-28 lg:mt-30 xl:mt-28">
+    <div className="w-full mt-20 md:mt-26 lg:mt-26 xl:mt-28">
       {/* HERO */}
       <div
         style={{

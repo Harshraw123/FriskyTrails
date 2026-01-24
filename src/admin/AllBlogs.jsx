@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import EditBlogForm from "./EditBlogForm";
-import { getAllBlogs } from "../api/admin.api";
+import { getAllBlogs, deleteBlog } from "../api/admin.api";
 
 const AllBlogs = () => {
   const [blogs, setBlogs] = useState([]);
@@ -27,6 +27,26 @@ const AllBlogs = () => {
     setLoading(false);
   }
 };
+
+  const handleDeleteBlog = async (blogId, blogTitle) => {
+    if (!window.confirm(`Are you sure you want to delete "${blogTitle}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await deleteBlog(blogId);
+      if (response.status) {
+        // Refresh the blogs list
+        await fetchBlogs();
+        alert("Blog deleted successfully!");
+      } else {
+        throw new Error(response.message || "Failed to delete blog");
+      }
+    } catch (err) {
+      alert(err.message || "Error deleting blog");
+      console.error("Error deleting blog:", err);
+    }
+  };
 
   useEffect(() => {
     fetchBlogs();
@@ -115,19 +135,28 @@ if (selectedBlog) {
                 {blog.city?.name && <span>📍 {blog.city?.name}</span>}
               </div>
 
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center gap-2">
                 <a
                   href={`/blog/${blog.slug}`}
                   className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                 >
                   Read more →
                 </a>
-                <button
-                  onClick={() => setSelectedBlog(blog)}
-                  className="text-sm text-white bg-green-500 hover:bg-green-600 px-3 py-1 rounded-md"
-                >
-                  ✏️ Edit
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSelectedBlog(blog)}
+                    className="text-sm text-white bg-green-500 hover:bg-green-600 px-3 py-1 rounded-md"
+                  >
+                    ✏️ Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteBlog(blog._id, blog.title)}
+                    className="text-sm text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md"
+                    title="Delete"
+                  >
+                    🗑️
+                  </button>
+                </div>
               </div>
             </div>
           </div>

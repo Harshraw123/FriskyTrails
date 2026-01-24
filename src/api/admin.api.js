@@ -238,6 +238,16 @@ const updateBlog = async (slug, formData) => {
   }
 };
 
+// Delete blog
+const deleteBlog = async (id) => {
+  try {
+    const response = await axiosInstance.delete(`/api/v1/admin/blog/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
 // Update product
 const updateProduct = async (slug, formData) => {
   try {
@@ -418,4 +428,4 @@ const updateCity = async (id, data) => {
 };
 
 
-export {updateState, getAllCountries, getCountryById, updateCountry, getStateById,getAllStates, createProduct, updateBlog,getBlogById,getProducts, getProductBySlug, updateProduct, deleteProduct, createBlog, createCountry, getCountries, createState, createCity, getStates, getCities, getCountryBySlug, getCountryWithBlogs, createProductType, getProductTypeBySlug, getProductTypeBySlugWithProduct, getAllProductTypes, uploadEditorImage, getAllBlogs, getProductTypeById, getAllCities, updateCity };
+export {updateState, getAllCountries, getCountryById, updateCountry, getStateById,getAllStates, createProduct, updateBlog, deleteBlog, getBlogById,getProducts, getProductBySlug, updateProduct, deleteProduct, createBlog, createCountry, getCountries, createState, createCity, getStates, getCities, getCountryBySlug, getCountryWithBlogs, createProductType, getProductTypeBySlug, getProductTypeBySlugWithProduct, getAllProductTypes, uploadEditorImage, getAllBlogs, getProductTypeById, getAllCities, updateCity };

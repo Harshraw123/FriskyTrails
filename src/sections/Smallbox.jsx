@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 const Smallbox = () => {
   const data = [
     { name: "Goa", image: "/nextimages/4.png", slug: "goa" },
-    { name: "Himachal", image: "/nextimages/5.png", slug: "himachal" },
-    { name: "Kashmir", image: "/nextimages/2.png", slug: "kashmir" },
+    { name: "Himachal", image: "/nextimages/5.png", slug: "himachal-pradesh" },
+    { name: "Kashmir", image: "/nextimages/2.png", slug: "jammu-and-kashmir" },
     { name: "Kerala", image: "/nextimages/6.png", slug: "kerala" },
     { name: "Tawang", image: "/destinations/Tawang.png", slug: "tawang" },
-    { name: "Andaman", image: "/destinations/Andaman.png", slug: "andaman" },
+    { name: "Andaman", image: "/destinations/Andaman.png", slug: "andaman-and-nicobar-islands" },
     { name: "Meghalaya", image: "/nextimages/1.png", slug: "meghalaya" },
     { name: "Rajasthan", image: "/destinations/Rajasthan.png", slug: "rajasthan" },
     { name: "Uttarakhand", image: "/destinations/Uttarakhand.png", slug: "uttarakhand" },
@@ -18,7 +18,7 @@ const Smallbox = () => {
       {data.map((item, index) => (
         <Link
           key={index}
-          to={`/state/${item.slug}/blogs`}
+          to={`/state/${item.slug}`}
           className="
             group relative overflow-hidden
             aspect-square

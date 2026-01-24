@@ -11,6 +11,7 @@ import userRoutes from "./routes/user.routes.js";
 import adventureRoutes from "./routes/adventure.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import blogRoutes from "./routes/blog.routes.js";
+import stateRoutes from "./routes/state.routes.js";
 
 
 dotenv.config({
@@ -91,6 +92,9 @@ app.use("/api/auth", authRoutes);
 //harsh
 
 app.use("/api/v1", adventureRoutes);
+
+
+app.use("/api/states", stateRoutes);
 
 // Log router object for diagnostics at startup
 console.log("app._router at startup:", !!app._router, app._router ? Object.keys(app._router) : null);
