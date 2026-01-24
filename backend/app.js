@@ -1,8 +1,8 @@
 import express from "express";
-const app = express();
+import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import dotenv from "dotenv";
+import passport from "passport";
 
 import authRoutes from "./routes/auth.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
@@ -12,60 +12,44 @@ import adminRoutes from "./routes/admin.routes.js";
 import blogRoutes from "./routes/blog.routes.js";
 import stateRoutes from "./routes/state.routes.js";
 
-import passport from "passport";
 import configurePassport from "./config/passport.js";
 import { isOriginAllowed, setCorsHeaders } from "./utils/corsHelper.js";
 
+dotenv.config();
+
+const app = express();
+
 /* =======================
-   ENV CONFIG
+   CORS (SAME CLEAN PATTERN)
 ======================= */
-try {
-  if (!process.env.VERCEL && !process.env.VERCEL_ENV) {
-    dotenv.config({ path: ".env" });
-  } else {
-    dotenv.config();
-  }
-} catch (error) {
-  console.log("Note: .env file not found, using environment variables");
-}
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // postman / server-to-server
+
+    if (isOriginAllowed(origin)) {
+      return callback(null, origin); // exact origin for cookies
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 
 /* =======================
-   CORS CONFIG (FIXED)
+   BODY / COOKIE
 ======================= */
-
-// CORS configuration moved to utils/corsHelper.js
-
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (isOriginAllowed(origin)) {
-        // IMPORTANT: send exact origin (not true)
-        callback(null, origin);
-      } else {
-        console.warn("CORS blocked:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  })
-);
-
-// Handle preflight requests explicitly for Vercel
-app.options("*", (req, res) => {
-  const origin = req.headers.origin;
-  if (isOriginAllowed(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-    res.header("Access-Control-Allow-Credentials", "true");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-  }
-  res.status(204).send();
-});
+app.use(express.json({ limit: "16kb" }));
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+app.use(cookieParser());
+app.use(express.static("public"));
 
 /* =======================
-   COOP / COEP
+   COOP / COEP (OAuth Safe)
 ======================= */
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
@@ -74,12 +58,10 @@ app.use((req, res, next) => {
 });
 
 /* =======================
-   BODY & COOKIE
+   PASSPORT (SAFE ON VERCEL)
 ======================= */
-app.use(express.json({ limit: "16kb" }));
-app.use(express.urlencoded({ extended: true, limit: "16kb" }));
-app.use(express.static("public"));
-app.use(cookieParser());
+configurePassport();
+app.use(passport.initialize());
 
 /* =======================
    REQUEST LOGGER
@@ -90,13 +72,7 @@ app.use((req, res, next) => {
 });
 
 /* =======================
-   PASSPORT
-======================= */
-configurePassport();
-app.use(passport.initialize());
-
-/* =======================
-   ROUTES (UNCHANGED)
+   ROUTES
 ======================= */
 app.use("/api/v1/contact", contactRoutes);
 app.use("/api/v1/user", userRoutes);
@@ -107,10 +83,26 @@ app.use("/api/v1", adventureRoutes);
 app.use("/api/states", stateRoutes);
 
 /* =======================
-   ROUTE DEBUGGER (UNCHANGED)
+   HEALTH CHECKS
 ======================= */
-console.log("app._router at startup:", !!app._router);
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "Frisky Trails API is running 🚀",
+    timestamp: new Date().toISOString(),
+  });
+});
 
+app.get("/health", (req, res) => {
+  res.json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+/* =======================
+   ROUTE DEBUGGER
+======================= */
 app.get("/__routes", (req, res) => {
   try {
     const stack =
@@ -120,15 +112,9 @@ app.get("/__routes", (req, res) => {
 
     const routes = stack.map((layer) => {
       if (layer.route) {
-        return {
-          path: layer.route.path,
-          methods: layer.route.methods,
-        };
+        return { path: layer.route.path, methods: layer.route.methods };
       }
-      return {
-        name: layer.name,
-        regexp: layer.regexp?.toString(),
-      };
+      return { name: layer.name };
     });
 
     res.json({ success: true, routes });
@@ -138,7 +124,7 @@ app.get("/__routes", (req, res) => {
 });
 
 /* =======================
-   404 HANDLER (CORS SAFE)
+   404 HANDLER
 ======================= */
 app.use((req, res) => {
   setCorsHeaders(req, res);
@@ -152,30 +138,19 @@ app.use((req, res) => {
    GLOBAL ERROR HANDLER
 ======================= */
 app.use((err, req, res, next) => {
-  console.error("\n--- ERROR DETAILS ---");
-  console.error("URL:", req.originalUrl);
-  console.error("METHOD:", req.method);
-  console.error("MESSAGE:", err.message);
-  console.error("STACK:", err.stack);
+  console.error("🔥 ERROR:", err.message);
 
-  // Always set CORS headers in error handler
   setCorsHeaders(req, res);
 
   let statusCode = 500;
 
-  if (err.statusCode >= 100 && err.statusCode < 600) {
+  if (typeof err.statusCode === "number" && err.statusCode >= 100 && err.statusCode < 600) {
     statusCode = err.statusCode;
   } else if (err.code === 11000) {
     statusCode = 409;
-  } else if (
-    err.name === "ValidationError" ||
-    err.name === "CastError"
-  ) {
+  } else if (err.name === "ValidationError" || err.name === "CastError") {
     statusCode = 400;
-  } else if (
-    err.name === "JsonWebTokenError" ||
-    err.name === "UnauthorizedError"
-  ) {
+  } else if (err.name === "JsonWebTokenError" || err.name === "UnauthorizedError") {
     statusCode = 401;
   }
 
@@ -186,8 +161,17 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Export for local development
-export { app };
-
-// Export default handler for Vercel serverless functions
+/* =======================
+   EXPORT (VERCEL STYLE)
+======================= */
 export default app;
+
+/* =======================
+   LOCAL DEV SERVER ONLY
+======================= */
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 8000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
