@@ -22,6 +22,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "google-auth-library": "^10.3.0",
+    "googleapis": "^170.1.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.17.0",
     "multer": "^2.0.2",
