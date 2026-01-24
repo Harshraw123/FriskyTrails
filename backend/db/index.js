@@ -3,6 +3,12 @@ import { DB_NAME } from "../constants.js";
 
 const connectDB = async () => {
   try {
+    // Check if already connected (important for serverless environments)
+    if (mongoose.connection.readyState === 1) {
+      console.log("MongoDB already connected");
+      return;
+    }
+
     if (!process.env.MONGODB_URI) {
       throw new Error("MONGODB_URI is not defined in .env");
     }
@@ -14,7 +20,11 @@ const connectDB = async () => {
     console.log(`MongoDB connected: ${connectionInstance.connection.host}`);
   } catch (error) {
     console.error("MongoDB connection error:", error.message);
-    process.exit(1);
+    // Don't exit process in serverless environments
+    if (process.env.VERCEL !== "1") {
+      process.exit(1);
+    }
+    throw error;
   }
 };
 
