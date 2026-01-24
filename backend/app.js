@@ -22,6 +22,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "https://frisky-trails.vercel.app",
+  "https://frisky-trails-cv8k.vercel.app",
   process.env.CORS_ORIGIN,
 ].filter(Boolean);
 
