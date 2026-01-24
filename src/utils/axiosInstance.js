@@ -3,16 +3,18 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL:
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_API_URL_PROD
-    : import.meta.env.VITE_API_URL_LOCAL,
-  timeout: 30000,
+  typeof window !== 'undefined' && window.location.hostname === 'localhost'
+  ? 'http://localhost:8000'
+  : (import.meta.env.VITE_API_URL_PROD || 'https://frisky-trails-backend.vercel.app');
+  timeout: 80000,
   withCredentials: true,
   headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
   }
 });
+
+//VITE_API_URL_PROD=https://frisky-trails-five.vercel.app
 
 
 // Request Interceptor

@@ -39,7 +39,7 @@ const allowedOrigins = [
   "https://frisky-trails-cv8k.vercel.app",
   process.env.CORS_ORIGIN,
   process.env.FRONTEND_URL,
-].filter(Boolean);
+]
 
 const isOriginAllowed = (origin) => {
   if (!origin) return true;
