@@ -40,6 +40,7 @@
     "react-quill": "^2.0.0",
     "react-router-dom": "^7.1.5",
     "react-slick": "^0.30.3",
+    "serverless-http": "^4.0.0",
     "slick-carousel": "^1.8.1",
     "swiper": "^11.2.4",
     "tailwind-merge": "^3.4.0"
