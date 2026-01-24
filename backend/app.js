@@ -14,6 +14,7 @@ import stateRoutes from "./routes/state.routes.js";
 
 import passport from "passport";
 import configurePassport from "./config/passport.js";
+import { isOriginAllowed, setCorsHeaders } from "./utils/corsHelper.js";
 
 /* =======================
    ENV CONFIG
@@ -32,25 +33,7 @@ try {
    CORS CONFIG (FIXED)
 ======================= */
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-  "https://frisky-trails.vercel.app",
-  "https://frisky-trails-cv8k.vercel.app",
-  process.env.CORS_ORIGIN,
-  process.env.FRONTEND_URL,
-]
-
-const isOriginAllowed = (origin) => {
-  if (!origin) return true;
-
-  if (allowedOrigins.includes(origin)) return true;
-
-  // allow all vercel previews
-  if (origin.endsWith(".vercel.app")) return true;
-
-  return false;
-};
+// CORS configuration moved to utils/corsHelper.js
 
 app.use(
   cors({
@@ -69,7 +52,17 @@ app.use(
   })
 );
 
-/* ❌ REMOVED app.options("*") — this was breaking preflight on Vercel */
+// Handle preflight requests explicitly for Vercel
+app.options("*", (req, res) => {
+  const origin = req.headers.origin;
+  if (isOriginAllowed(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+  }
+  res.status(204).send();
+});
 
 /* =======================
    COOP / COEP
@@ -148,12 +141,7 @@ app.get("/__routes", (req, res) => {
    404 HANDLER (CORS SAFE)
 ======================= */
 app.use((req, res) => {
-  const origin = req.headers.origin;
-  if (isOriginAllowed(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-    res.header("Access-Control-Allow-Credentials", "true");
-  }
-
+  setCorsHeaders(req, res);
   res.status(404).json({
     success: false,
     message: `Route ${req.originalUrl} not found`,
@@ -168,12 +156,10 @@ app.use((err, req, res, next) => {
   console.error("URL:", req.originalUrl);
   console.error("METHOD:", req.method);
   console.error("MESSAGE:", err.message);
+  console.error("STACK:", err.stack);
 
-  const origin = req.headers.origin;
-  if (isOriginAllowed(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-    res.header("Access-Control-Allow-Credentials", "true");
-  }
+  // Always set CORS headers in error handler
+  setCorsHeaders(req, res);
 
   let statusCode = 500;
 
@@ -200,4 +186,8 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Export for local development
 export { app };
+
+// Export default handler for Vercel serverless functions
+export default app;

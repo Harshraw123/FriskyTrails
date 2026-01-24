@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 import { sheetConfig } from '../config/sheetConfig.js';
 import { pushToSheet } from '../utils/pushToSheet.js';
+import { setCorsHeaders } from '../utils/corsHelper.js';
 
 // Environment variables (set these in your .env file)
 const JWT_SECRET = process.env.JWT_SECRET || process.env.ACCESS_TOKEN_SECRET || 'your-super-secret-jwt-key';
@@ -192,6 +193,9 @@ export const login = async (req, res) => {
  */
 export const getMe = async (req, res) => {
   try {
+    // Set CORS headers
+    setCorsHeaders(req, res);
+
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -213,6 +217,11 @@ export const getMe = async (req, res) => {
     });
   } catch (error) {
     console.error('GetMe error:', error);
+    console.error('Error stack:', error.stack);
+    
+    // Set CORS headers even on error
+    setCorsHeaders(req, res);
+    
     res.status(500).json({
       success: false,
       message: 'Server error',
