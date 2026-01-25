@@ -14,7 +14,7 @@ const axiosInstance = axios.create({
   }
 });
 
-//VITE_API_URL_PROD=https://frisky-trails-five.vercel.app
+
 
 
 // Request Interceptor

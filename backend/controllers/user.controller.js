@@ -5,7 +5,7 @@ import { pushToSheet } from '../utils/pushToSheet.js';
 import { setCorsHeaders } from '../utils/corsHelper.js';
 
 // Environment variables (set these in your .env file)
-const JWT_SECRET = process.env.JWT_SECRET || process.env.ACCESS_TOKEN_SECRET || 'your-super-secret-jwt-key';
+const JWT_SECRET = process.env.JWT_SECRET || process.env.ACCESS_TOKEN_SECRET ;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 const COOKIE_EXPIRES_DAYS = 7;
 
