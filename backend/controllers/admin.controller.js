@@ -215,7 +215,7 @@ const getCountryWithBlogs = asyncHandler(async (req, res) => {
   const blogs = await CreateBlog.find({ country: country._id })
     .populate("state", "name slug")
     .populate("city", "name slug")
-    .select("title slug image content authorName state city createdAt");
+    .select("title slug coverImage  content authorName state city createdAt");
 
   res
     .status(200)
@@ -395,6 +395,39 @@ const updateBlog = asyncHandler(async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: false, message: "Server error" });
+  }
+});
+
+const deleteBlog = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid blog ID",
+      });
+    }
+
+    const blog = await CreateBlog.findByIdAndDelete(id);
+    if (!blog) {
+      return res.status(404).json({
+        status: false,
+        message: "Blog not found",
+      });
+    }
+
+    res.status(200).json({
+      status: true,
+      data: blog,
+      message: "Blog deleted successfully",
+    });
+  } catch (err) {
+    console.error("Error deleting blog:", err);
+    res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
   }
 });
 
@@ -718,6 +751,7 @@ export {
   updateCountry,
   createBlog,
   updateBlog,
+  deleteBlog,
   createCountry,
   getCountryWithBlogs,
   getCountries,

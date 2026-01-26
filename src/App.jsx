@@ -28,9 +28,9 @@ import Transport from "./ServicesPages/Transport";
 import RailTickets from "./ServicesPages/RailTickets";
 import Offers from "./ServicesPages/Offers";
 import Hotels from "./ServicesPages/Hotels";
-import CountryPage from "./admin/CountryPage";
-// import StatePage from "./admin/StatePage";
-import CityPage from "./admin/CityPage";
+import CountryPage from "./pages/countryPage/CountryPage";
+import CityPage from "./pages/cityPage/CityPage";
+
 import ProductDetails from "./admin/ProductDetails";
 import ProductsPage from "./admin/ProductsPage";
 import CreateProductPage from "./admin/CreateProductPage";
@@ -66,9 +66,9 @@ const App = () => {
           <Route path="/hiring" element={<Hiring />} />
           <Route path="/blog/newblog" element={<Newblog />} />
           <Route path="/blog/:slug" element={<Newlog />} />
-          <Route path="/country/:slug/blogs" element={<CountryPage />} />
-          <Route path="/state/:slug/blogs" element={<StatePage />} />
-          <Route path="/city/:slug/blogs" element={<CityPage />} />
+          <Route path="/country/:slug/" element={<CountryPage />} />
+          <Route path="/state/:slug/" element={<StatePage />} />
+          <Route path="/city/:slug/" element={<CityPage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/tours/:slug" element={<ProductDetails />} />
           <Route path="/productType/:slug/product" element={<ProductType />} />

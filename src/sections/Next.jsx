@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 const Next = () => {
   const data = [
     { image: "/nextimages/1.png", name: "Meghalaya", slug: "meghalaya" },
-    { image: "/nextimages/2.png", name: "Kashmir", slug: "kashmir" },
+    { image: "/nextimages/2.png", name: "Kashmir", slug: "jammu-and-kashmir" },
     { image: "/nextimages/3.png", name: "Ladakh", slug: "ladakh" },
     { image: "/nextimages/4.png", name: "Goa", slug: "goa" },
-    { image: "/nextimages/5.png", name: "Himachal", slug: "himachal" },
+    { image: "/nextimages/5.png", name: "Himachal", slug: "himachal-pradesh" },
     { image: "/nextimages/6.png", name: "Kerala", slug: "kerala" },
   ];
 
@@ -26,7 +26,7 @@ const Next = () => {
           {data.map((item) => (
             <Link
               key={item.name}
-              to={`/state/${item.slug}/blogs`}
+              to={`/state/${item.slug}`}
               className="min-w-[70vw] rounded-2xl shadow-xl flex-shrink-0 group transition-all duration-500"
             >
               <div
@@ -55,7 +55,7 @@ const Next = () => {
           {data.map((item) => (
             <Link
               key={item.name}
-              to={`/state/${item.slug}/blogs`}
+              to={`/state/${item.slug}/`}
               className="group w-full h-72 md:h-80"
             >
               <div
@@ -82,7 +82,7 @@ const Next = () => {
           {data.map((item) => (
             <Link
               key={item.name}
-              to={`/state/${item.slug}/blogs`}
+              to={`/state/${item.slug}`}
               className="group w-full h-80 lg:h-96"
             >
               <div

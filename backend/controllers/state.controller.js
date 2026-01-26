@@ -84,7 +84,7 @@ export const getStateWithBlogs = asyncHandler(async (req, res) => {
   const blogs = await CreateBlog.find({ state: state._id })
     .populate("country", "name slug")
     .populate("city", "name slug")
-    .select("title slug image content authorName country city createdAt");
+    .select("title slug coverImage content authorName country city createdAt");
 
   res.status(200).json(
     new ApiResponse(200, { state, blogs }, "State with blogs fetched successfully")

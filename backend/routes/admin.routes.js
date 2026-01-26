@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyAdmin } from "../middlewares/verifyAdmin.js";
-import { createBlog, createCountry, getAllBlogs, getAllCountries, getAllStates, getBlogById, getCountries, getCountryBySlug, getCountryById, getCountryWithBlogs, updateBlog, updateState, updateCountry, uploadEditorImage, getAllCities, getCityById, updateCity, getStateById } from "../controllers/admin.controller.js";
+import { createBlog, createCountry, getAllBlogs, getAllCountries, getAllStates, getBlogById, getCountries, getCountryBySlug, getCountryById, getCountryWithBlogs, updateBlog, deleteBlog, updateState, updateCountry, uploadEditorImage, getAllCities, getCityById, updateCity, getStateById } from "../controllers/admin.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { createState, getStates, getStateWithBlogs } from "../controllers/state.controller.js";
 import { createCity, getCities, getCityWithBlogs } from "../controllers/city.controller.js";
@@ -22,6 +22,7 @@ router.get("/blogs", (req, res, next) => {
 }, getAllBlogs);
 router.route("/blog/:id").get(verifyJWT, verifyAdmin, getBlogById);
 router.put("/blog/:id", upload.single("image"), verifyJWT, verifyAdmin, updateBlog);
+router.delete("/blog/:id", verifyJWT, verifyAdmin, deleteBlog);
 
 router.post("/upload-editor-image", upload.single("image"), verifyJWT, verifyAdmin, uploadEditorImage);
 router.post("/create-country", upload.single("image"), verifyJWT, verifyAdmin, createCountry);

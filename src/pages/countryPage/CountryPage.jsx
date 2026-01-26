@@ -1,52 +1,51 @@
 import { useEffect, useState } from "react"
 import { useParams, Link } from "react-router-dom"
 import LoadingSpinner from "./Loading"
-import { getStateWithBlogs } from "../../api/admin.api"
+import { getCountryWithBlogs } from "../../api/admin.api"
 import CardCarousel from "../components/Carousel"
 
-const StatePage = () => {
+const CountryPage = () => {
   const { slug } = useParams()
 
-  const [state, setState] = useState(null)
+  const [country, setCountry] = useState(null)
   const [blogs, setBlogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    const fetchStateWithBlogs = async () => {
+    const fetchCountryWithBlogs = async () => {
       try {
         setLoading(true)
         setError(null)
-        const result = await getStateWithBlogs(slug)
+        const result = await getCountryWithBlogs(slug)
 
-        // ApiResponse wrapper handling: result.data contains { state, blogs }
+        // ApiResponse wrapper handling: result.data contains { country, blogs }
         if (result?.data) {
-          setState(result.data.state)
-          console.log(result.data)
+          setCountry(result.data.country)
           setBlogs(result.data.blogs || [])
         } else {
-          setError("State data not found")
+          setError("Country data not found")
         }
       } catch (error) {
-        console.error("Error fetching state:", error)
-        setError(error?.response?.data?.message || error?.message || "Failed to fetch state data")
+        console.error("Error fetching country:", error)
+        setError(error?.response?.data?.message || error?.message || "Failed to fetch country data")
       } finally {
         setLoading(false)
       }
     }
 
     if (slug) {
-      fetchStateWithBlogs()
+      fetchCountryWithBlogs()
     }
   }, [slug])
 
   if (loading) return <LoadingSpinner />
 
-  if (error || !state) {
+  if (error || !country) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600 text-lg mb-4">{error || "State not found"}</p>
+          <p className="text-gray-600 text-lg mb-4">{error || "Country not found"}</p>
           <Link
             to="/"
             className="text-orange-500 hover:text-orange-600 underline"
@@ -75,8 +74,8 @@ const StatePage = () => {
         }}
       >
         <img
-          src={state.image}
-          alt={state.name}
+          src={country.image}
+          alt={country.name}
           className="w-full h-64 sm:h-80 md:h-96 object-cover object-right sm:object-center"
         />
       </div>
@@ -85,7 +84,7 @@ const StatePage = () => {
         {/* HEADER */}
         <section className="border-b pb-4">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">
-            {state.name}
+            {country.name}
           </h1>
           <p className="mt-3 text-gray-600 max-w-2xl">
             Experiential journeys will make you a storyteller
@@ -94,7 +93,7 @@ const StatePage = () => {
 
         {/* BLOGS */}
         <h2 className="text-2xl sm:text-3xl font-semibold mt-8 mb-6">
-          Top Blogs in {state.name}
+          Top Blogs in {country.name}
         </h2>
 
         <CardCarousel
@@ -134,4 +133,6 @@ const StatePage = () => {
   )
 }
 
-export default StatePage
+export default CountryPage
+
+

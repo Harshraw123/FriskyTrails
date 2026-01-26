@@ -62,7 +62,7 @@ const ContactUs = () => {
         </div>
 
         {/* Office Section */}
-        <div className="w-full pt-16 sm:pt-20 md:pt-24">
+        <div className="w-full pt-16 mb-4 sm:pt-20 md:pt-24">
           <h4 className="font-semibold text-base sm:text-lg md:text-xl text-center text-orange-500">
             Our Location
           </h4>

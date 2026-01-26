@@ -87,7 +87,7 @@ export const getCityWithBlogs = asyncHandler(async (req, res) => {
   const blogs = await CreateBlog.find({ city: city._id })
     .populate("country", "name slug")
     .populate("state", "name slug")
-    .select("title slug image content authorName state country createdAt");
+    .select("title slug coverImage content authorName state country createdAt");
 
   res
     .status(200)
