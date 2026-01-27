@@ -116,7 +116,6 @@ const Navbar = () => {
                   alt="FriskyTrails Logo"
                 />
               </Link>
-              {/* Show name on ALL devices, smaller on mobile */}
               <h1 className="text-lg sm:text-base md:text-xl lg:text-2xl xl:text-3xl font-bold whitespace-nowrap text-gray-800 flex-shrink-0">
                 FriskyTrails
               </h1>
@@ -224,7 +223,7 @@ const Navbar = () => {
         />
       )}
 
-      {/* Mobile Drawer - Full height, opens from RIGHT side with higher z-index */}
+      {/* Mobile Drawer */}
       <div
         className={`fixed top-0 right-0 h-screen w-[85vw] max-w-sm bg-white shadow-2xl z-[1002] transform transition-transform duration-300 ease-in-out overflow-y-auto lg:hidden mobile-menu ${
           isMenuOpen ? "translate-x-0" : "translate-x-full"
@@ -368,21 +367,19 @@ const Navbar = () => {
             >
               Contact Us
             </Link>
-          </div>
 
-          {/* Bottom CTA */}
-          <div className="mt-8 pt-8 border-t border-gray-200">
+            {/* Login/Logout - Moved here after Contact Us */}
             {isLoggedIn ? (
               <button
                 onClick={handleLogout}
-                className="w-full bg-black text-white px-6 py-4 mb-2 rounded-2xl font-semibold text-lg hover:bg-gray-800 active:scale-95 transition-all shadow-lg"
+                className="block w-full p-4 rounded-xl hover:bg-amber-50 hover:text-amber-600 transition-all text-lg font-semibold border-t border-gray-200 mt-2 pt-6"
               >
                 Logout
               </button>
             ) : (
               <button
                 onClick={() => setShowLogin(true)}
-                className="w-full bg-gradient-to-r from-amber-500 mb-2 to-orange-500 text-white px-6 py-4 rounded-2xl font-semibold text-lg hover:from-amber-600 hover:to-orange-600 active:scale-95 transition-all shadow-lg"
+                className="block w-full p-4 rounded-xl hover:bg-amber-50 hover:text-amber-600 transition-all text-lg font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-white border-t border-gray-200 mt-2 pt-6 shadow-lg"
               >
                 Login
               </button>
@@ -391,7 +388,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Login Modal - Only show when explicitly triggered */}
+      {/* Login Modal */}
       {showLogin && <LoginModal onClose={handleLoginClose} />}
     </>
   );
