@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
 import { useParams, Link } from "react-router-dom"
-import LoadingSpinner from "./Loading"
+
 import { getCityWithBlogs } from "../../api/admin.api"
 import CardCarousel from "../components/Carousel"
+import FriskyLoader from "../../components/Loader"
 
 const CityPage = () => {
   const { slug } = useParams()
@@ -39,7 +40,7 @@ const CityPage = () => {
     }
   }, [slug])
 
-  if (loading) return <LoadingSpinner />
+  if (loading) return <FriskyLoader/>
 
   if (error || !city) {
     return (
@@ -58,11 +59,11 @@ const CityPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       {/* HERO */}
     
       <div
-  className="w-full mt-20 lg:mt-[7rem]"
+  className="w-full mt-12 lg:mt-[6.7rem]"
   style={{
     marginTop:
       typeof window !== "undefined"

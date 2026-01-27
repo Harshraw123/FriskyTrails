@@ -36,24 +36,29 @@ const EditCountryForm = ({ countryId, onClose, onUpdate }) => {
   /* ---------------- FETCH COUNTRY ---------------- */
   useEffect(() => {
     const fetchCountry = async () => {
+      if (!countryId) {
+        setLoading(false);
+        return;
+      }
+      
       try {
         const res = await getCountryById(countryId);
         const country = res.data[0];
 
-        setFormData({
-          name: country?.name || "",
-          slug: country?.slug || "",
-        });
-
-        setImagePreview(country.image || "");
+        if (country) {
+          setFormData({
+            name: country?.name || "",
+            slug: country?.slug || "",
+          });
+          setImagePreview(country.image || "");
+        }
       } catch (err) {
-        // Error handled silently
+        setMessage("Failed to load country data");
       } finally {
         setLoading(false);
       }
     };
-
-    if (countryId) fetchCountry();
+    fetchCountry();
   }, [countryId]);
 
   /* ---------------- INPUT CHANGE ---------------- */
@@ -67,7 +72,6 @@ const EditCountryForm = ({ countryId, onClose, onUpdate }) => {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)+/g, "");
-
       setFormData((prev) => ({ ...prev, slug: generatedSlug }));
     }
   };
@@ -76,14 +80,19 @@ const EditCountryForm = ({ countryId, onClose, onUpdate }) => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
   };
 
-  /* ---------------- SUBMIT ---------------- */
+  /* ---------------- SUBMIT - FIXED SCROLL + SUCCESS ---------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // 🔥 Save scroll position before submit
+    const scrollContainer = window;
+    const scrollX = scrollContainer.scrollX;
+    const scrollY = scrollContainer.scrollY;
+    
     setSubmitting(true);
     setMessage("");
 
@@ -94,13 +103,36 @@ const EditCountryForm = ({ countryId, onClose, onUpdate }) => {
 
     try {
       const res = await updateCountry(countryId, data);
+      
+      // 🔥 Show success message first
       setMessage(res.message || "Country updated successfully! ✅");
+      
+      // 🔥 Update parent list with new data (no full re-render)
+      if (onUpdate) {
+        onUpdate({
+          _id: countryId,
+          ...formData,
+          image: imagePreview
+        });
+      }
+      
+      // 🔥 Restore exact scroll position
       setTimeout(() => {
-        if (onUpdate) onUpdate();
+        scrollContainer.scrollTo(scrollX, scrollY);
+      }, 100);
+      
+      // 🔥 Auto-close after 2 seconds (user sees success)
+      setTimeout(() => {
         if (onClose) onClose();
-      }, 1500);
+      }, 2000);
+      
     } catch (err) {
       setMessage(err.message || "Failed to update country ❌");
+      
+      // Restore scroll on error too
+      setTimeout(() => {
+        scrollContainer.scrollTo(scrollX, scrollY);
+      }, 100);
     } finally {
       setSubmitting(false);
     }
@@ -113,7 +145,7 @@ const EditCountryForm = ({ countryId, onClose, onUpdate }) => {
 
   /* ---------------- UI ---------------- */
   return (
-    <div className="p-4 w-[70%] mt-10 mx-auto">
+    <div className="p-4 w-full max-w-xl sm:max-w-2xl md:w-[70%] mt-10 mx-auto">
       <h2 className="text-xl font-bold mb-4">Edit Country</h2>
 
       <form
@@ -128,20 +160,19 @@ const EditCountryForm = ({ countryId, onClose, onUpdate }) => {
           value={formData.name}
           onChange={handleChange}
           required
-          className="p-2 border rounded"
+          className="p-2 border rounded w-full"
           placeholder="Country name"
         />
 
         {/* Slug */}
         <input
-  type="text"
-  name="slug"
-  value={formData.slug}
-  readOnly
-  placeholder="Slug will be auto-generated from country name"
-  className="p-2 border rounded bg-gray-100 text-gray-600 cursor-not-allowed"
-/>
-
+          type="text"
+          name="slug"
+          value={formData.slug}
+          readOnly
+          placeholder="Slug will be auto-generated from country name"
+          className="p-2 border rounded bg-gray-100 text-gray-600 cursor-not-allowed w-full"
+        />
 
         {/* Image */}
         {imagePreview && (
@@ -152,16 +183,21 @@ const EditCountryForm = ({ countryId, onClose, onUpdate }) => {
           />
         )}
 
-        <input type="file" accept="image/*" onChange={handleImageChange} />
+        <input 
+          type="file" 
+          accept="image/*" 
+          onChange={handleImageChange} 
+          className="p-2 border rounded w-full"
+        />
 
         {/* Submit */}
         <button
           type="submit"
           disabled={submitting}
-          className={`bg-blue-600 text-white py-2 rounded transition ${
+          className={`w-full py-3 px-6 rounded-lg font-medium transition ${
             submitting
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-blue-700"
+              ? "bg-blue-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700 text-white"
           }`}
         >
           {submitting ? "Updating..." : "Update Country"}
@@ -170,10 +206,10 @@ const EditCountryForm = ({ countryId, onClose, onUpdate }) => {
 
       {message && (
         <div
-          className={`mt-4 p-3 rounded-md text-center font-medium ${
+          className={`mt-4 p-4 rounded-lg text-center font-medium text-sm sm:text-base ${
             message.includes("Failed") || message.includes("❌")
-              ? "bg-red-50 text-red-600 border border-red-200"
-              : "bg-green-50 text-green-600 border border-green-200"
+              ? "bg-red-50 text-red-700 border-2 border-red-200"
+              : "bg-green-50 text-green-700 border-2 border-green-200 animate-pulse"
           }`}
         >
           {message}
@@ -184,4 +220,3 @@ const EditCountryForm = ({ countryId, onClose, onUpdate }) => {
 };
 
 export default EditCountryForm;
-

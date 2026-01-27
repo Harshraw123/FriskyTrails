@@ -33,7 +33,7 @@ const Navbar = () => {
 
   const toggleAdventures = () => {
     setShowAdventures((prev) => {
-      if (!prev) setShowServices(false);
+      if (!prev) setShowAdventures(false);
       return !prev;
     });
   };
@@ -89,48 +89,48 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Header Spacer - Accounts for both mobile (6vh) and desktop headers */}
-      <div className="h-[6vh] md:h-[6vh] lg:h-0" />
+      {/* Header Spacer - Reduced for small devices */}
+      <div className="h-[5vh] sm:h-[5.5vh] md:h-[6vh] lg:h-0" />
       
-      <div className="fixed top-[6vh] left-0 right-0 z-[999] w-full">
+      <div className="fixed top-[5vh] sm:top-[5.5vh] md:top-[6vh] left-0 right-0 z-[999] w-full">
         <div className="
           h-auto 
-          min-h-[40px]           
-          sm:min-h-[60px] 
-          md:min-h-[70px]
+          min-h-[28px] xs:min-h-[30px]           
+          sm:min-h-[40px] 
+          md:min-h-[50px]
           lg:h-[8vh]            
           w-full bg-white/95 backdrop-blur-md border-b border-gray-200
           flex flex-col lg:flex-row 
           justify-between items-center
-          px-4 sm:px-6 lg:px-8 xl:px-12
-          py-3 sm:py-4 lg:py-0
+          px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12
+          py-2 sm:py-2.5 md:py-3 lg:py-0
           shadow-sm
         ">
           {/* Logo and Hamburger */}
-          <div className="flex justify-between items-center w-full lg:w-auto py-2 lg:py-0">
-            <div className="flex items-center gap-2 sm:gap-2 lg:gap-3 flex-shrink-0">
+          <div className="flex justify-between items-center w-full lg:w-auto py-1.5 lg:py-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 flex-shrink-0">
               <Link to="/">
                 <img
-                  className="h-10 w-12 sm:h-12 sm:w-12 md:h-14 md:w-14 lg:h-16 lg:w-16 xl:h-20 xl:w-20 object-contain flex-shrink-0"
+                  className="h-8 w-10 sm:h-10 sm:w-11 md:h-12 md:w-12 lg:h-16 lg:w-16 xl:h-20 xl:w-20 object-contain flex-shrink-0"
                   src="/logo.PNG"
                   alt="FriskyTrails Logo"
                 />
               </Link>
               {/* Show name on ALL devices, smaller on mobile */}
-              <h1 className="text-xl sm:text-base md:text-xl lg:text-2xl xl:text-3xl font-bold whitespace-nowrap text-gray-800 flex-shrink-0">
+              <h1 className="text-lg sm:text-base md:text-xl lg:text-2xl xl:text-3xl font-bold whitespace-nowrap text-gray-800 flex-shrink-0">
                 FriskyTrails
               </h1>
             </div>
             
             <button 
               onClick={toggleMenu} 
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors z-[1001] ml-4 flex-shrink-0"
+              className="lg:hidden p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 transition-colors z-[1001] ml-2 sm:ml-4 flex-shrink-0"
               aria-label="Toggle menu"
             >
               {isMenuOpen ? (
-                <span className="text-2xl font-bold">✕</span>
+                <span className="text-xl sm:text-2xl font-bold">✕</span>
               ) : (
-                <div className="space-y-1.5 w-6">
+                <div className="space-y-1 w-5 sm:w-6">
                   <div className="w-full h-0.5 bg-black rounded"></div>
                   <div className="w-full h-0.5 bg-black rounded"></div>
                   <div className="w-full h-0.5 bg-black rounded"></div>
@@ -230,9 +230,9 @@ const Navbar = () => {
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="p-6 flex flex-col h-full">
+        <div className="p-4 flex flex-col h-full">
           {/* Header */}
-          <div className="flex justify-between items-center mb-8 pt-20">
+          <div className="flex justify-between items-center mb-8 pt-2">
             <h2 className="text-2xl font-bold text-gray-800">Menu</h2>
             <button
               onClick={toggleMenu}
@@ -242,19 +242,8 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* User Greeting */}
-          {isLoggedIn && (
-            <div className="flex items-center gap-3 mb-8 p-4 bg-gray-50 rounded-xl">
-              <FaUser className="text-2xl text-amber-500" />
-              <div>
-                <p className="font-semibold text-lg text-gray-800">Hi, {storedFirstName}</p>
-                <p className="text-sm text-gray-500">Welcome back!</p>
-              </div>
-            </div>
-          )}
-
           {/* Navigation Links */}
-          <div className="flex-1 space-y-4 text-lg font-medium">
+          <div className="flex-1 space-y-2 text-lg font-medium">
             <Link
               to="/"
               onClick={handleNavigation}
@@ -402,8 +391,8 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Login Modal */}
-      {(showLogin || (isMenuOpen && !isLoggedIn)) && <LoginModal onClose={handleLoginClose} />}
+      {/* Login Modal - Only show when explicitly triggered */}
+      {showLogin && <LoginModal onClose={handleLoginClose} />}
     </>
   );
 };

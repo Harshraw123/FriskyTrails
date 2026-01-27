@@ -13,9 +13,18 @@ export const AuthProvider = ({ children }) => {
     let isMounted = true; // Flag to prevent state updates if component unmounts
 
     const checkAuth = async () => {
+      // Skip /me when we have no token — avoids 401 and "Failed to load resource" in console
+      const token = localStorage.getItem('token');
+      if (!token || token === 'none') {
+        if (isMounted) {
+          setUser(null);
+          setIsAdmin(false);
+        }
+        if (isMounted) setLoading(false);
+        return;
+      }
+
       try {
-        // Backend uses GET /me, not POST /get-user
-        // Token is in HTTP-only cookie, sent automatically with withCredentials: true
         const response = await axiosInstance.get('/api/v1/user/me');
         const userData = response?.data?.user;
 
@@ -29,11 +38,13 @@ export const AuthProvider = ({ children }) => {
           }
         }
       } catch (error) {
-        // Silently handle 401 errors (user not authenticated)
-        // Only log other errors
+        // 401 = invalid/expired token — clear and treat as logged out
         if (isMounted) {
           setUser(null);
           setIsAdmin(false);
+        }
+        if (error.response?.status === 401) {
+          localStorage.removeItem('token');
         }
       } finally {
         if (isMounted) {

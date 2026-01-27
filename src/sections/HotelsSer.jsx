@@ -10,7 +10,7 @@ import HotelsForm from "../components/HotelsForm";
 const HotelsSer = () => {
   return (
     <>
-      <div className="min-h-screen mt-20 md:mt-28 w-full">
+     <div className="min-h-screen mt-12 md:mt-20 w-full">
         {/* Banner Section */}
         <div
           className="h-[40vh] sm:h-[50vh] md:h-[60vh] w-full"

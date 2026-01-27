@@ -15,15 +15,13 @@ export const protect = async (req, res, next) => {
 
     let token;
 
-    // 🍪 Cookie check
-    if (req.cookies && req.cookies.token) {
-      token = req.cookies.token;
-      console.log('Token source: COOKIE');
-    }
-    // 🔑 Header fallback
-    else if (req.headers.authorization?.startsWith('Bearer')) {
+    // 🔑 Prefer Authorization header (fresh token from login response) over cookie (can be stale)
+    if (req.headers.authorization?.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
       console.log('Token source: AUTH HEADER');
+    } else if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+      console.log('Token source: COOKIE');
     }
 
     // ❌ No token
@@ -35,8 +33,8 @@ export const protect = async (req, res, next) => {
       });
     }
 
-    // 🔐 JWT secret check
-    const JWT_SECRET = process.env.JWT_SECRET;
+    // 🔐 JWT secret — must match user.controller.js (sign uses JWT_SECRET || ACCESS_TOKEN_SECRET || 'my-sec')
+    const JWT_SECRET = process.env.JWT_SECRET || process.env.ACCESS_TOKEN_SECRET 
 
     if (!JWT_SECRET) {
       console.error('❌ JWT_SECRET is UNDEFINED in ENV');
@@ -56,6 +54,8 @@ export const protect = async (req, res, next) => {
       console.log('✅ Token verified, decoded ID:', decoded.id);
     } catch (jwtError) {
       console.error('❌ JWT VERIFY FAILED:', jwtError.message);
+      // Clear bad cookie so the browser stops sending it; client can use Authorization header after next login
+      res.clearCookie('token', { path: '/', httpOnly: true, sameSite: 'lax' });
       return res.status(401).json({
         success: false,
         message: 'Invalid or expired token',

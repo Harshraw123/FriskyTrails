@@ -109,35 +109,57 @@ const EditProductForm = ({ productId, onClose, onUpdate }) => {
   }, []);
 
   // Fetch states when country changes
-  useEffect(() => {
-    const fetchStates = async () => {
-      if (!formData.country) return setStates([]);
-      try {
-        const res = await getStates(formData.country);
-        setStates(res.data);
+// Fetch states when country changes
+useEffect(() => {
+  const fetchStates = async () => {
+    if (!formData.country) {
+      setStates([]);
+      return;
+    }
+    try {
+      const res = await getStates(formData.country);
+      setStates(res.data);
+      
+      // Only reset state/city if current state isn't valid for this country
+      const hasValidState = formData.state && res.data.some(s => s._id === formData.state);
+      if (!hasValidState) {
         setFormData(prev => ({ ...prev, state: "", city: "" }));
         setCities([]);
-      } catch (err) {
-        // Error handled silently
       }
-    };
-    fetchStates();
-  }, [formData.country]);
+    } catch (err) {
+      console.error("Error fetching states:", err);
+      setStates([]);
+    }
+  };
+  fetchStates();
+}, [formData.country]);
+
 
   // Fetch cities when state changes
-  useEffect(() => {
-    const fetchCities = async () => {
-      if (!formData.state) return setCities([]);
-      try {
-        const res = await getCities(formData.state);
-        setCities(res.data);
+// Fetch cities when state changes
+useEffect(() => {
+  const fetchCities = async () => {
+    if (!formData.state) {
+      setCities([]);
+      return;
+    }
+    try {
+      const res = await getCities(formData.state);
+      setCities(res.data);
+      
+      // Only reset city if current city isn't valid for this state
+      const hasValidCity = formData.city && res.data.some(c => c._id === formData.city);
+      if (!hasValidCity) {
         setFormData(prev => ({ ...prev, city: "" }));
-      } catch (err) {
-        // Error handled silently
       }
-    };
-    fetchCities();
-  }, [formData.state]);
+    } catch (err) {
+      console.error("Error fetching cities:", err);
+      setCities([]);
+    }
+  };
+  fetchCities();
+}, [formData.state]);
+
 
   // Fetch product types
   useEffect(() => {

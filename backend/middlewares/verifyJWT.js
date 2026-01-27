@@ -8,12 +8,13 @@ export const verifyJWT = async (req, res, next) => {
 
     let token;
 
-    if (req.cookies?.token) {
-      token = req.cookies.token;
-      console.log("Token source: COOKIE");
-    } else if (req.headers.authorization?.startsWith("Bearer")) {
+    // Prefer Authorization header (matches auth.middleware; avoids stale cookie issues)
+    if (req.headers.authorization?.startsWith("Bearer")) {
       token = req.headers.authorization.split(" ")[1];
       console.log("Token source: HEADER");
+    } else if (req.cookies?.token) {
+      token = req.cookies.token;
+      console.log("Token source: COOKIE");
     }
 
     if (!token || token === "none") {
@@ -24,7 +25,7 @@ export const verifyJWT = async (req, res, next) => {
       });
     }
 
-    const JWT_SECRET = process.env.JWT_SECRET;
+    const JWT_SECRET = process.env.JWT_SECRET || process.env.ACCESS_TOKEN_SECRET
 
     if (!JWT_SECRET) {
       console.error("🔥 JWT_SECRET NOT SET IN ENV");

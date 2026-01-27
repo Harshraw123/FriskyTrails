@@ -81,8 +81,11 @@ const LoginModal = ({ onClose }) => {
           password: form.password,
         });
         if (response.success) {
-          // Token is stored in httpOnly cookie by backend, no need to store in localStorage
-          // Store user info for display purposes
+          // In dev the backend returns token in body; store it so /me uses it via Authorization header
+          // (avoids stale-cookie "invalid signature" when cookie and sign secret get out of sync)
+          if (response.token) {
+            localStorage.setItem("token", response.token);
+          }
           if (response.user?.name) {
             localStorage.setItem("userName", response.user.name);
             localStorage.setItem("firstName", response.user.name.split(' ')[0] || response.user.name);

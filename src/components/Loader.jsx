@@ -15,10 +15,11 @@ const FriskyLoader = ({ size = "lg", text = "Loading" }) => {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center gap-6 p-8 min-h-[250px]">
+      {/* FULL SCREEN WRAPPER */}
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-orange-50">
+        
         <div className="relative flex items-center justify-center">
-          
-          {/* 🔄 Rotating ring ONLY */}
+          {/* 🔄 Rotating ring */}
           <div
             className={`absolute ${ringSize[size]} rounded-full`}
             style={{
@@ -29,7 +30,7 @@ const FriskyLoader = ({ size = "lg", text = "Loading" }) => {
             }}
           />
 
-          {/* 🖼️ Fixed logo with pulse */}
+          {/* 🖼️ Logo with pulse */}
           <div
             className={`relative ${sizeClasses[size]} rounded-full overflow-hidden flex items-center justify-center shadow-md`}
             style={{
@@ -51,14 +52,27 @@ const FriskyLoader = ({ size = "lg", text = "Loading" }) => {
         )}
       </div>
 
+      {/* ANIMATIONS */}
       <style jsx>{`
         @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
+
         @keyframes pulse {
-          0%, 100% { opacity: 0.85; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.05); }
+          0%,
+          100% {
+            opacity: 0.85;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.05);
+          }
         }
       `}</style>
     </>

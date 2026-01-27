@@ -6,7 +6,7 @@ const Smallbox = () => {
     { name: "Himachal", image: "/nextimages/5.png", slug: "himachal-pradesh" },
     { name: "Kashmir", image: "/nextimages/2.png", slug: "jammu-and-kashmir" },
     { name: "Kerala", image: "/nextimages/6.png", slug: "kerala" },
-    { name: "Tawang", image: "/destinations/Tawang.png", slug: "tawang" },
+    { name: "Arunachal ", image: "/destinations/Arunachal.png", slug: "arunachal-pradesh" },
     { name: "Andaman", image: "/destinations/Andaman.png", slug: "andaman-and-nicobar-islands" },
     { name: "Meghalaya", image: "/nextimages/1.png", slug: "meghalaya" },
     { name: "Rajasthan", image: "/destinations/Rajasthan.png", slug: "rajasthan" },

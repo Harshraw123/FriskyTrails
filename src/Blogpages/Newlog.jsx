@@ -32,7 +32,7 @@ const Newlog = () => {
         className="flex items-center justify-center min-h-[70vh] py-20 px-4"
        
       >
-        <FriskyLoader size="sm" text="Loading product details..." />
+        <FriskyLoader />
       </div>
     );
   }
@@ -40,7 +40,7 @@ const Newlog = () => {
   if (!blog) return null;
 
   return (
-    <div className="min-h-screen mt-20 lg:mt-28 w-full">
+    <div className="min-h-screen mt-12 md:mt-20 lg:mt-24 w-full">
       <div
         className="w-full min-h-[460px] bg-no-repeat md:bg-contain"
         style={{

@@ -28,9 +28,9 @@ const ContactUs = () => {
 
   return (
     <>
-      <div className="relative min-h-screen mt-28 md:mt-32 lg:mt-40 w-full px-4 sm:px-6">
+      <div className="relative min-h-screen mt-20 md:mt- lg:mt-40 w-full px-4 sm:px-6">
         {/* Title */}
-        <h1 className="font-bold  text-4xl sm:text-5xl md:text-7xl lg:text-8xl tracking-tight text-center mt-15">
+        <h1 className="font-bold  text-4xl sm:text-5xl md:text-7xl lg:text-8xl tracking-tight text-center md:py-6 lg:mt-0 ">
           Contact Us
         </h1>
 
