@@ -102,8 +102,6 @@ router.get(
 
 router.get(
   "/city/:id",
-  verifyJWT,
-  verifyAdmin, 
   getCityById
 );
 
@@ -128,7 +126,7 @@ router.post(
 );
 
 router.get("/products", getProducts);
-router.route("/product/id/:id").get(verifyJWT, verifyAdmin, getProductById);
+router.route("/product/id/:id").get(getProductById);
 router.get("/product/slug/:slug", getProductBySlug);
 router.put("/product/:slug", upload.array("images", 5), updateProduct, verifyJWT, verifyAdmin);
 router.delete("/product/:slug", deleteProduct);
