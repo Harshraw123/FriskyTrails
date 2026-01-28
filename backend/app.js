@@ -122,6 +122,11 @@ app.get("/health", (req, res) => {
   });
 });
 
+app.use("/api/states", stateRoutes);
+
+// Log router object for diagnostics at startup
+console.log("app._router at startup:", !!app._router, app._router ? Object.keys(app._router) : null);
+
 /* =======================
    ROUTE DEBUGGER
 ======================= */
