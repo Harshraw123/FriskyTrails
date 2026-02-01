@@ -15,7 +15,6 @@ export const sendOtp = async (req, res) => {
       });
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ 
@@ -24,12 +23,12 @@ export const sendOtp = async (req, res) => {
       });
     }
 
-    let user = await User.findOne({ email: email.toLowerCase() });
+    const lowerEmail = email.toLowerCase();
+    let user = await User.findOne({ email: lowerEmail });
     const isNewUser = !user;
     
-    if (!user) {
-      user = await User.create({ email: email.toLowerCase() });
-      
+    if (isNewUser) {
+      user = await User.create({ email: lowerEmail });
       // Sync new user to Google Sheet
       const config = sheetConfig.User;
       await pushToSheet({
@@ -37,15 +36,22 @@ export const sendOtp = async (req, res) => {
         columns: config.columns,
         document: user,
       });
+    } else {
+      // Block if active OTP exists
+      if (user.otp && user.otpExpiry && user.otpExpiry > Date.now()) {
+        return res.status(429).json({ 
+          success: false,
+          message: "OTP already sent. Please check your email." 
+        });
+      }
     }
 
     const otp = generateOTP();
-
     user.otp = otp;
     user.otpExpiry = Date.now() + 5 * 60 * 1000; // 5 min
     await user.save();
 
-    await sendOTPEmail(email.toLowerCase(), otp);
+    await sendOTPEmail(lowerEmail, otp);
 
     res.status(200).json({ 
       success: true,
@@ -71,7 +77,8 @@ export const verifyOtp = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const lowerEmail = email.toLowerCase();
+    const user = await User.findOne({ email: lowerEmail });
     if (!user) {
       return res.status(404).json({ 
         success: false,
@@ -100,14 +107,16 @@ export const verifyOtp = async (req, res) => {
       });
     }
 
+    // All checks passed: verify and clear
     user.isVerified = true;
     user.otp = null;
     user.otpExpiry = null;
     await user.save();
 
-    res.json({ 
+    res.status(200).json({ 
       success: true,
-      message: "Email verified successfully. You can now complete your signup." 
+      message: "Email verified successfully. You can now complete your signup.",
+      data: { email: lowerEmail, verified: true } // Optional: return user info
     });
   } catch (error) {
     console.error('Verify OTP error:', error);
