@@ -4,6 +4,7 @@ import { sendOTPEmail } from "../utils/sendEmail.js";
 import { pushToSheet } from "../utils/pushToSheet.js";
 import { sheetConfig } from "../config/sheetConfig.js";
 
+
 export const sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
@@ -15,7 +16,6 @@ export const sendOtp = async (req, res) => {
       });
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ 
@@ -24,12 +24,12 @@ export const sendOtp = async (req, res) => {
       });
     }
 
-    let user = await User.findOne({ email: email.toLowerCase() });
+    const lowerEmail = email.toLowerCase();
+    let user = await User.findOne({ email: lowerEmail });
     const isNewUser = !user;
     
-    if (!user) {
-      user = await User.create({ email: email.toLowerCase() });
-      
+    if (isNewUser) {
+      user = await User.create({ email: lowerEmail });
       // Sync new user to Google Sheet
       const config = sheetConfig.User;
       await pushToSheet({
@@ -37,15 +37,22 @@ export const sendOtp = async (req, res) => {
         columns: config.columns,
         document: user,
       });
+    } else {
+      // Clear expired OTP for existing users
+      if (user.otpExpiry && user.otpExpiry > Date.now()) {
+        return res.status(429).json({ 
+          success: false,
+          message: "OTP already sent. Please check your email." 
+        });
+      }
     }
 
     const otp = generateOTP();
-
     user.otp = otp;
     user.otpExpiry = Date.now() + 5 * 60 * 1000; // 5 min
     await user.save();
 
-    await sendOTPEmail(email.toLowerCase(), otp);
+    await sendOTPEmail(lowerEmail, otp);
 
     res.status(200).json({ 
       success: true,
