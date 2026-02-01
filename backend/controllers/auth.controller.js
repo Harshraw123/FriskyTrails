@@ -4,7 +4,6 @@ import { sendOTPEmail } from "../utils/sendEmail.js";
 import { pushToSheet } from "../utils/pushToSheet.js";
 import { sheetConfig } from "../config/sheetConfig.js";
 
-
 export const sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
@@ -38,8 +37,8 @@ export const sendOtp = async (req, res) => {
         document: user,
       });
     } else {
-      // Clear expired OTP for existing users
-      if (user.otpExpiry && user.otpExpiry > Date.now()) {
+      // Block if active OTP exists
+      if (user.otp && user.otpExpiry && user.otpExpiry > Date.now()) {
         return res.status(429).json({ 
           success: false,
           message: "OTP already sent. Please check your email." 
@@ -78,7 +77,8 @@ export const verifyOtp = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const lowerEmail = email.toLowerCase();
+    const user = await User.findOne({ email: lowerEmail });
     if (!user) {
       return res.status(404).json({ 
         success: false,
@@ -107,14 +107,16 @@ export const verifyOtp = async (req, res) => {
       });
     }
 
+    // All checks passed: verify and clear
     user.isVerified = true;
     user.otp = null;
     user.otpExpiry = null;
     await user.save();
 
-    res.json({ 
+    res.status(200).json({ 
       success: true,
-      message: "Email verified successfully. You can now complete your signup." 
+      message: "Email verified successfully. You can now complete your signup.",
+      data: { email: lowerEmail, verified: true } // Optional: return user info
     });
   } catch (error) {
     console.error('Verify OTP error:', error);
